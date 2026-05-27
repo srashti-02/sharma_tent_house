@@ -237,6 +237,22 @@ The program will use multiple JSON files instead of one large file.
 
 Using separate files makes the system cleaner and easier to maintain.
 
+### Scalability Limitation
+
+This JSON-file approach is suitable for small and medium business scale because it is simple and easy to maintain.
+
+However, at very large scale (such as thousands of bookings per year), availability checks may become slow because the program must repeatedly read and scan large booking files to calculate overlapping reservations and unique unit usage.
+
+To answer a single availability check, the system may need to:
+- load bookings.json
+- scan overlapping delivery and return dates
+- inspect booked line items
+- verify unique unit reservations
+
+This repeated file scanning can become inefficient as booking volume grows.
+
+In the future, the system may need a database-based architecture with indexed queries and normalized tables for better performance and scalability.
+
 ---
 
 ## Example Inventory Record
