@@ -3,7 +3,9 @@
 # 1. Three-Sentence Specification
 
 This project is a command-line based rental management system for Sharma Tent House built using Python and JSON files.
+
 Rakesh ji and Ankit will use the program to manage inventory, bookings, deliveries, returns, customer payments, damages, and item availability during busy wedding seasons.
+
 The project will be considered complete when the system can safely store all business data, prevent booking mistakes, track rented items correctly, and support daily shop operations without depending on manual ledgers.
 
 ---
@@ -22,7 +24,6 @@ The tent house has many kinds of rental items. Some items exist in large quantit
 * item_name (string)
 * category (string)
 * total_quantity (integer)
-* available_quantity (integer)
 * rent_per_day (float)
 * damage_charge (float)
 * item_type (bulk / limited / unique)
@@ -40,7 +41,7 @@ The tent house has many kinds of rental items. Some items exist in large quantit
 
 ### Reasoning
 
-Tracking both total quantity and available quantity makes availability checking faster and simpler.
+Availability should not be stored as a fixed number because item availability changes depending on overlapping booking dates. The system will calculate availability dynamically using booking date ranges and total inventory quantity.
 
 ---
 
@@ -89,9 +90,21 @@ Each booked item contains:
 * quantity
 * price_per_day
 
+### Availability Logic
+
+Availability is calculated dynamically for a requested booking date range.
+
+The system checks all existing bookings whose dates overlap with the requested booking dates.
+
+Available quantity is calculated using:
+
+available quantity = total quantity - overlapping booked quantity
+
+This prevents overbooking during peak wedding seasons when multiple events happen at the same time.
+
 ### Reasoning
 
-Each booking can contain many items, so a list structure is necessary.
+Each booking can contain many items, so a list structure is necessary. Date-range based availability checking is required to correctly handle overlapping bookings.
 
 ---
 
@@ -119,9 +132,9 @@ This helps calculate losses and customer dues correctly.
 # 3. How the Groupings Connect
 
 * Customers create bookings for events.
-* Bookings reserve inventory items for specific dates.
-* Inventory quantity decreases when a booking is confirmed.
-* Returned items increase inventory quantity again.
+* Bookings reserve inventory items for specific date ranges.
+* Inventory availability is calculated by checking overlapping bookings.
+* Returned items complete the rental cycle.
 * Damaged or missing items create extra charges for customers.
 * Returns are directly connected to bookings.
 * Customer payment records depend on booking totals, deposits, damages, and late fees.
@@ -147,13 +160,12 @@ Using separate files makes the system cleaner and easier to maintain.
 
 ## Example Inventory Record
 
-```json id="zku982"
+```json
 {
   "item_id": "I101",
   "item_name": "Plastic Chair",
   "category": "Furniture",
   "total_quantity": 500,
-  "available_quantity": 320,
   "rent_per_day": 12,
   "damage_charge": 250,
   "item_type": "bulk"
@@ -164,7 +176,7 @@ Using separate files makes the system cleaner and easier to maintain.
 
 ## Example Customer Record
 
-```json id="vfi734"
+```json
 {
   "customer_id": "C201",
   "customer_name": "Rahul Agarwal",
@@ -177,7 +189,7 @@ Using separate files makes the system cleaner and easier to maintain.
 
 ## Example Booking Record
 
-```json id="owx661"
+```json
 {
   "booking_id": "B301",
   "customer_id": "C201",
@@ -207,7 +219,7 @@ Using separate files makes the system cleaner and easier to maintain.
 3. Remove inactive item
 4. View all inventory items
 5. Search item by name
-6. Check item availability by date
+6. Check item availability by date range
 
 ---
 
@@ -223,39 +235,40 @@ Using separate files makes the system cleaner and easier to maintain.
 
 10. Create new booking
 11. Prevent overbooking automatically
-12. Edit existing booking
-13. Cancel booking
-14. Calculate booking amount
-15. Record deposit payment
-16. Show pending payment
+12. Check overlapping bookings
+13. Edit existing booking
+14. Cancel booking
+15. Calculate booking amount
+16. Record deposit payment
+17. Show pending payment
 
 ---
 
 ## Delivery & Return Operations
 
-17. View today’s deliveries
-18. View today’s collections
-19. Return rented items
-20. Record damaged items
-21. Record missing items
-22. Add late return charges
+18. View today’s deliveries
+19. View today’s collections
+20. Return rented items
+21. Record damaged items
+22. Record missing items
+23. Add late return charges
 
 ---
 
 ## Reporting Operations
 
-23. Generate monthly revenue report
-24. Generate damage/loss report
-25. Show currently rented items
-26. Show idle inventory items
+24. Generate monthly revenue report
+25. Generate damage/loss report
+26. Show currently rented items
+27. Show idle inventory items
 
 ---
 
 ## System Operations
 
-27. Save data automatically
-28. Load previous data at startup
-29. Exit program safely
+28. Save data automatically
+29. Load previous data at startup
+30. Exit program safely
 
 ---
 
@@ -266,7 +279,7 @@ Using separate files makes the system cleaner and easier to maintain.
 3. Invalid date format → ask user to re-enter date.
 4. Negative quantity entered → reject input.
 5. Negative payment entered → reject input.
-6. Booking exceeds available quantity → reject booking.
+6. Booking exceeds available quantity for requested dates → reject booking.
 7. Booking ID already exists → generate new ID automatically.
 8. Customer ID not found → show error message.
 9. Returning more items than rented → block action.
@@ -275,13 +288,13 @@ Using separate files makes the system cleaner and easier to maintain.
 12. Late return detected → add late charges.
 13. Invalid menu option entered → show menu again.
 14. Empty inventory booking attempt → reject booking.
-15. Booking dates overlap incorrectly → prevent confirmation.
+15. Incorrect overlapping booking calculation → prevent confirmation.
 16. User exits suddenly during save → create backup file.
 
 ---
 
 # 7. One Thing I Don’t Know Yet
 
-I still need to research and test the best way to calculate inventory availability when many bookings overlap across different dates, especially during peak wedding season when multiple events happen at the same time.
+I still need to research and test the best way to efficiently calculate inventory availability across overlapping booking date ranges during peak wedding season traffic.
 
 Project plan completed successfully.
