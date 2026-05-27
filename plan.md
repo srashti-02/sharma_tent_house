@@ -4,9 +4,9 @@
 
 This project is a command-line based rental management system for Sharma Tent House built using Python and JSON files.
 
-Rakesh ji and Ankit will use the program to manage inventory, bookings, deliveries, returns, customer payments, damages, and item availability during busy wedding seasons.
+Rakesh ji and Ankit will use the program to manage inventory, bookings, deliveries, returns, customer payments, damages, discounts, and item availability during busy wedding seasons.
 
-The project will be considered complete when the system can safely store all business data, prevent booking mistakes, track rented items correctly, and support daily shop operations without depending on manual ledgers.
+The project will be considered complete when the system can safely store all business data, prevent booking mistakes, track rented items correctly, support negotiated pricing, and handle daily shop operations without depending on manual ledgers.
 
 ---
 
@@ -24,7 +24,7 @@ The tent house has many kinds of rental items. Some items exist in large quantit
 * item_name (string)
 * category (string)
 * total_quantity (integer)
-* rent_per_day (float)
+* standard_rent_per_day (float)
 * damage_charge (float)
 * item_type (bulk / limited / unique)
 * item_status (active/inactive)
@@ -105,14 +105,18 @@ For bulk items:
 * booking_item_id
 * item_id
 * quantity
-* price_per_day
+* standard_price_per_day
+* quoted_price_per_day
+* discount_reason (optional string)
 
 For unique or limited items:
 
 * booking_item_id
 * item_id
 * unit_id
-* price_per_day
+* standard_price_per_day
+* quoted_price_per_day
+* discount_reason (optional string)
 
 ### Payment Logic
 
@@ -122,6 +126,8 @@ The booking record stores the money position before return processing.
 * deposit_paid is the advance collected at booking time.
 * remaining_payment is the balance still due after deposit, before damage or missing-item adjustments.
 * payment_status shows whether the customer has paid the quote fully, partially, or not yet.
+
+The system stores both the standard inventory rate and the final quoted rate so discounts or negotiated pricing can be tracked separately from default pricing.
 
 ### Availability Logic
 
@@ -217,7 +223,7 @@ The booking section stores the pre-return balance, and the return section stores
 * Returned items complete the rental cycle.
 * Damaged or missing items create extra charges for customers.
 * Returns are directly connected to bookings.
-* Customer payment records depend on booking totals, deposits, damages, late fees, and refund adjustments.
+* Customer payment records depend on booking totals, deposits, damages, late fees, refund adjustments, and negotiated discounts.
 
 These connections are important because the entire business depends on inventory movement between customers and the shop.
 
@@ -244,10 +250,11 @@ This JSON-file approach is suitable for small and medium business scale because 
 However, at very large scale (such as thousands of bookings per year), availability checks may become slow because the program must repeatedly read and scan large booking files to calculate overlapping reservations and unique unit usage.
 
 To answer a single availability check, the system may need to:
-- load bookings.json
-- scan overlapping delivery and return dates
-- inspect booked line items
-- verify unique unit reservations
+
+* load bookings.json
+* scan overlapping delivery and return dates
+* inspect booked line items
+* verify unique unit reservations
 
 This repeated file scanning can become inefficient as booking volume grows.
 
@@ -263,7 +270,7 @@ In the future, the system may need a database-based architecture with indexed qu
   "item_name": "Plastic Chair",
   "category": "Furniture",
   "total_quantity": 500,
-  "rent_per_day": 12,
+  "standard_rent_per_day": 12,
   "damage_charge": 250,
   "item_type": "bulk"
 }
@@ -314,18 +321,22 @@ In the future, the system may need a database-based architecture with indexed qu
       "booking_item_id": "BI101",
       "item_id": "I101",
       "quantity": 200,
-      "price_per_day": 12
+      "standard_price_per_day": 12,
+      "quoted_price_per_day": 10,
+      "discount_reason": "Regular customer discount"
     },
     {
       "booking_item_id": "BI102",
       "item_id": "I301",
       "unit_id": "U501",
-      "price_per_day": 8000
+      "standard_price_per_day": 8000,
+      "quoted_price_per_day": 7500,
+      "discount_reason": "Festival season negotiation"
     }
   ],
   "deposit_paid": 5000,
-  "total_amount": 24000,
-  "remaining_payment": 19000,
+  "total_amount": 22000,
+  "remaining_payment": 17000,
   "payment_status": "partial"
 }
 ```
@@ -364,8 +375,8 @@ In the future, the system may need a database-based architecture with indexed qu
   "damage_total": 0,
   "missing_total": 0,
   "refundable_adjustments": 0,
-  "booking_remaining_payment": 19000,
-  "final_balance": 19000,
+  "booking_remaining_payment": 17000,
+  "final_balance": 17000,
   "settlement_status": "customer_owes"
 }
 ```
@@ -401,41 +412,43 @@ In the future, the system may need a database-based architecture with indexed qu
 13. Prevent overbooking automatically
 14. Check overlapping bookings
 15. Validate unique item availability
-16. Edit existing booking
-17. Cancel booking
-18. Calculate booking amount
-19. Record deposit payment
-20. Show pending payment
-21. Track delivery and expected return dates
+16. Apply negotiated pricing or discounts
+17. Edit existing booking
+18. Cancel booking
+19. Calculate booking amount
+20. Record deposit payment
+21. Show pending payment
+22. Track delivery and expected return dates
 
 ---
 
 ## Delivery & Return Operations
 
-22. View today’s deliveries
-23. View today’s collections
-24. Return rented items
-25. Record damaged items
-26. Record missing items
-27. Add late return charges
-28. Calculate final settlement
+23. View today’s deliveries
+24. View today’s collections
+25. Return rented items
+26. Record damaged items
+27. Record missing items
+28. Add late return charges
+29. Calculate final settlement
 
 ---
 
 ## Reporting Operations
 
-29. Generate monthly revenue report
-30. Generate damage/loss report
-31. Show currently rented items
-32. Show idle inventory items
+30. Generate monthly revenue report
+31. Generate damage/loss report
+32. Show currently rented items
+33. Show idle inventory items
+34. Generate discount usage report
 
 ---
 
 ## System Operations
 
-33. Save data automatically
-34. Load previous data at startup
-35. Exit program safely
+35. Save data automatically
+36. Load previous data at startup
+37. Exit program safely
 
 ---
 
@@ -460,7 +473,8 @@ In the future, the system may need a database-based architecture with indexed qu
 17. Same unique unit booked for overlapping dates → reject booking.
 18. Unique unit marked under maintenance → block booking.
 19. Final settlement mismatch after return update → recalculate from booking_remaining_payment and return charges.
-20. User exits suddenly during save → create backup file.
+20. Negative quoted price after discount → reject booking.
+21. User exits suddenly during save → create backup file.
 
 ---
 
