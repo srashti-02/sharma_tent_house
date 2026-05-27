@@ -450,6 +450,10 @@ Using separate files makes the system cleaner and easier to maintain.
 
 # 7. One Thing I Don’t Know Yet
 
-I still need to research and test the best way to efficiently calculate inventory availability across overlapping delivery and return date ranges during peak wedding season traffic, especially when both bulk inventory and individually tracked unique units are booked simultaneously.
+I still need to research and test the best way to calculate inventory availability across overlapping delivery and return date ranges.
+
+Before implementation, I plan to manually simulate multiple overlapping bookings across several dates to verify how availability should be calculated for both bulk inventory and individually tracked unique units.
+
+This will help determine which values should be permanently stored and which should be calculated dynamically during availability checks.
 
 Project plan completed successfully.
