@@ -102,12 +102,14 @@ A booking stores all event-related information.
 
 For bulk items:
 
+* booking_item_id
 * item_id
 * quantity
 * price_per_day
 
 For unique or limited items:
 
+* booking_item_id
 * item_id
 * unit_id
 * price_per_day
@@ -116,10 +118,10 @@ For unique or limited items:
 
 The booking record stores the money position before return processing.
 
-* `total_amount` is the full quoted amount for the booking.
-* `deposit_paid` is the advance collected at booking time.
-* `remaining_payment` is the balance still due after deposit, before damage or missing-item adjustments.
-* `payment_status` shows whether the customer has paid the quote fully, partially, or not yet.
+* total_amount is the full quoted amount for the booking.
+* deposit_paid is the advance collected at booking time.
+* remaining_payment is the balance still due after deposit, before damage or missing-item adjustments.
+* payment_status shows whether the customer has paid the quote fully, partially, or not yet.
 
 ### Availability Logic
 
@@ -133,7 +135,7 @@ available quantity = total quantity - overlapping booked quantity
 
 For unique items:
 
-the system checks whether a specific `unit_id` is already reserved during overlapping dates.
+the system checks whether a specific unit_id is already reserved during overlapping dates.
 
 This prevents overbooking during peak wedding seasons when multiple events happen at the same time.
 
@@ -158,9 +160,7 @@ The program must track returned, damaged, and missing items.
 * return_id (string)
 * booking_id (string)
 * actual_return_date (date)
-* returned_items (list)
-* damaged_items (list)
-* missing_items (list)
+* return_line_items (list)
 * late_fees (float)
 * damage_total (float)
 * missing_total (float)
@@ -168,6 +168,19 @@ The program must track returned, damaged, and missing items.
 * booking_remaining_payment (float)
 * final_balance (float)
 * settlement_status (customer_owes/refund_due/settled)
+
+### Return Line Item Structure
+
+Each return line item contains:
+
+* booking_item_reference
+* item_id
+* unit_id (optional for unique items)
+* booked_quantity
+* returned_quantity
+* damaged_quantity
+* missing_quantity
+* line_status (settled/pending/damaged/missing)
 
 ### Final Settlement Logic
 
@@ -179,13 +192,15 @@ final_balance = booking_remaining_payment + late_fees + damage_total + missing_t
 
 Meaning:
 
-* If `final_balance > 0`, the customer still owes the shop.
-* If `final_balance < 0`, the shop owes a refund to the customer.
-* If `final_balance = 0`, the booking is fully settled.
+* If final_balance > 0, the customer still owes the shop.
+* If final_balance < 0, the shop owes a refund to the customer.
+* If final_balance = 0, the booking is fully settled.
 
 ### Reasoning
 
 This helps calculate losses and customer dues correctly.
+
+Each return line item is connected directly to its original booked item so the system can track settlement status separately for every inventory item in the booking.
 
 The booking section stores the pre-return balance, and the return section stores the final settlement. That keeps the money flow clear and prevents confusion between the quoted amount, the pending amount after advance, and the final amount after damages or refunds.
 
@@ -198,6 +213,7 @@ The booking section stores the pre-return balance, and the return section stores
 * Inventory availability is calculated by checking overlapping bookings.
 * Bulk items are tracked using quantities.
 * Unique items are tracked using unit_id values.
+* Return line items connect directly to booked items.
 * Returned items complete the rental cycle.
 * Damaged or missing items create extra charges for customers.
 * Returns are directly connected to bookings.
@@ -279,11 +295,13 @@ Using separate files makes the system cleaner and easier to maintain.
   "expected_return_date": "2026-12-21",
   "booked_items": [
     {
+      "booking_item_id": "BI101",
       "item_id": "I101",
       "quantity": 200,
       "price_per_day": 12
     },
     {
+      "booking_item_id": "BI102",
       "item_id": "I301",
       "unit_id": "U501",
       "price_per_day": 8000
@@ -305,18 +323,27 @@ Using separate files makes the system cleaner and easier to maintain.
   "return_id": "R401",
   "booking_id": "B301",
   "actual_return_date": "2026-12-21",
-  "returned_items": [
+  "return_line_items": [
     {
+      "booking_item_reference": "BI101",
       "item_id": "I101",
-      "quantity": 200
+      "booked_quantity": 200,
+      "returned_quantity": 200,
+      "damaged_quantity": 0,
+      "missing_quantity": 0,
+      "line_status": "settled"
     },
     {
+      "booking_item_reference": "BI102",
       "item_id": "I301",
-      "unit_id": "U501"
+      "unit_id": "U501",
+      "booked_quantity": 1,
+      "returned_quantity": 1,
+      "damaged_quantity": 0,
+      "missing_quantity": 0,
+      "line_status": "settled"
     }
   ],
-  "damaged_items": [],
-  "missing_items": [],
   "late_fees": 0,
   "damage_total": 0,
   "missing_total": 0,
