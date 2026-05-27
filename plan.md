@@ -41,7 +41,7 @@ The tent house has many kinds of rental items. Some items exist in large quantit
 
 ### Reasoning
 
-Availability should not be stored as a fixed number because item availability changes depending on overlapping booking dates. The system will calculate availability dynamically using booking date ranges and total inventory quantity.
+Availability should not be stored as a fixed number because item availability changes depending on overlapping booking dates. The system will calculate availability dynamically using delivery and return date ranges along with total inventory quantity.
 
 ---
 
@@ -74,8 +74,10 @@ A booking stores all event-related information.
 * customer_id (string)
 * event_name (string)
 * event_location (string)
-* booking_start_date (date)
-* booking_end_date (date)
+* event_start_date (date)
+* event_end_date (date)
+* delivery_date (date)
+* expected_return_date (date)
 * booked_items (list)
 * total_amount (float)
 * deposit_paid (float)
@@ -94,7 +96,7 @@ Each booked item contains:
 
 Availability is calculated dynamically for a requested booking date range.
 
-The system checks all existing bookings whose dates overlap with the requested booking dates.
+The system checks all existing bookings whose delivery and return dates overlap with the requested inventory movement window.
 
 Available quantity is calculated using:
 
@@ -104,7 +106,7 @@ This prevents overbooking during peak wedding seasons when multiple events happe
 
 ### Reasoning
 
-Each booking can contain many items, so a list structure is necessary. Date-range based availability checking is required to correctly handle overlapping bookings.
+Each booking can contain many items, so a list structure is necessary. Date-range based availability checking is required to correctly handle overlapping bookings and real-world delivery schedules.
 
 ---
 
@@ -116,6 +118,7 @@ The program must track returned, damaged, and missing items.
 
 * return_id (string)
 * booking_id (string)
+* actual_return_date (date)
 * returned_items (list)
 * damaged_items (list)
 * missing_items (list)
@@ -132,7 +135,7 @@ This helps calculate losses and customer dues correctly.
 # 3. How the Groupings Connect
 
 * Customers create bookings for events.
-* Bookings reserve inventory items for specific date ranges.
+* Bookings reserve inventory items for delivery-to-return date ranges.
 * Inventory availability is calculated by checking overlapping bookings.
 * Returned items complete the rental cycle.
 * Damaged or missing items create extra charges for customers.
@@ -194,8 +197,10 @@ Using separate files makes the system cleaner and easier to maintain.
   "booking_id": "B301",
   "customer_id": "C201",
   "event_name": "Agarwal Wedding",
-  "booking_start_date": "2026-12-18",
-  "booking_end_date": "2026-12-20",
+  "event_start_date": "2026-12-18",
+  "event_end_date": "2026-12-20",
+  "delivery_date": "2026-12-17",
+  "expected_return_date": "2026-12-21",
   "booked_items": [
     {
       "item_id": "I101",
@@ -241,34 +246,35 @@ Using separate files makes the system cleaner and easier to maintain.
 15. Calculate booking amount
 16. Record deposit payment
 17. Show pending payment
+18. Track delivery and expected return dates
 
 ---
 
 ## Delivery & Return Operations
 
-18. View today’s deliveries
-19. View today’s collections
-20. Return rented items
-21. Record damaged items
-22. Record missing items
-23. Add late return charges
+19. View today’s deliveries
+20. View today’s collections
+21. Return rented items
+22. Record damaged items
+23. Record missing items
+24. Add late return charges
 
 ---
 
 ## Reporting Operations
 
-24. Generate monthly revenue report
-25. Generate damage/loss report
-26. Show currently rented items
-27. Show idle inventory items
+25. Generate monthly revenue report
+26. Generate damage/loss report
+27. Show currently rented items
+28. Show idle inventory items
 
 ---
 
 ## System Operations
 
-28. Save data automatically
-29. Load previous data at startup
-30. Exit program safely
+29. Save data automatically
+30. Load previous data at startup
+31. Exit program safely
 
 ---
 
@@ -289,12 +295,13 @@ Using separate files makes the system cleaner and easier to maintain.
 13. Invalid menu option entered → show menu again.
 14. Empty inventory booking attempt → reject booking.
 15. Incorrect overlapping booking calculation → prevent confirmation.
-16. User exits suddenly during save → create backup file.
+16. Delivery date after expected return date → reject booking.
+17. User exits suddenly during save → create backup file.
 
 ---
 
 # 7. One Thing I Don’t Know Yet
 
-I still need to research and test the best way to efficiently calculate inventory availability across overlapping booking date ranges during peak wedding season traffic.
+I still need to research and test the best way to efficiently calculate inventory availability across overlapping delivery and return date ranges during peak wedding season traffic.
 
 Project plan completed successfully.
