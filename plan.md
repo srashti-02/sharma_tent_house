@@ -95,6 +95,7 @@ A booking stores all event-related information.
 * total_amount (float)
 * deposit_paid (float)
 * remaining_payment (float)
+* payment_status (pending/partial/paid)
 * booking_status (active/completed/cancelled)
 
 ### Booked Item Structure
@@ -111,6 +112,15 @@ For unique or limited items:
 * unit_id
 * price_per_day
 
+### Payment Logic
+
+The booking record stores the money position before return processing.
+
+* `total_amount` is the full quoted amount for the booking.
+* `deposit_paid` is the advance collected at booking time.
+* `remaining_payment` is the balance still due after deposit, before damage or missing-item adjustments.
+* `payment_status` shows whether the customer has paid the quote fully, partially, or not yet.
+
 ### Availability Logic
 
 Availability is calculated dynamically for a requested booking date range.
@@ -123,7 +133,7 @@ available quantity = total quantity - overlapping booked quantity
 
 For unique items:
 
-the system checks whether a specific unit_id is already reserved during overlapping dates.
+the system checks whether a specific `unit_id` is already reserved during overlapping dates.
 
 This prevents overbooking during peak wedding seasons when multiple events happen at the same time.
 
@@ -134,6 +144,8 @@ Each booking can contain many items, so a list structure is necessary.
 Date-range based availability checking is required to correctly handle overlapping bookings and real-world delivery schedules.
 
 Unique items require unit-level tracking because the same physical LED Wall or Sound System cannot be sent to two different events at the same time.
+
+The booking record should store only the pre-return money position. The final settlement belongs in the return record so the system has one clear place for “customer owes us” versus “refund due”.
 
 ---
 
@@ -151,11 +163,31 @@ The program must track returned, damaged, and missing items.
 * missing_items (list)
 * late_fees (float)
 * damage_total (float)
+* missing_total (float)
+* refundable_adjustments (float)
+* booking_remaining_payment (float)
 * final_balance (float)
+* settlement_status (customer_owes/refund_due/settled)
+
+### Final Settlement Logic
+
+The return record stores the final money outcome after the event.
+
+The system calculates:
+
+final_balance = booking_remaining_payment + late_fees + damage_total + missing_total - refundable_adjustments
+
+Meaning:
+
+* If `final_balance > 0`, the customer still owes the shop.
+* If `final_balance < 0`, the shop owes a refund to the customer.
+* If `final_balance = 0`, the booking is fully settled.
 
 ### Reasoning
 
 This helps calculate losses and customer dues correctly.
+
+The booking section stores the pre-return balance, and the return section stores the final settlement. That keeps the money flow clear and prevents confusion between the quoted amount, the pending amount after advance, and the final amount after damages or refunds.
 
 ---
 
@@ -169,7 +201,7 @@ This helps calculate losses and customer dues correctly.
 * Returned items complete the rental cycle.
 * Damaged or missing items create extra charges for customers.
 * Returns are directly connected to bookings.
-* Customer payment records depend on booking totals, deposits, damages, and late fees.
+* Customer payment records depend on booking totals, deposits, damages, late fees, and refund adjustments.
 
 These connections are important because the entire business depends on inventory movement between customers and the shop.
 
@@ -258,7 +290,40 @@ Using separate files makes the system cleaner and easier to maintain.
     }
   ],
   "deposit_paid": 5000,
-  "total_amount": 24000
+  "total_amount": 24000,
+  "remaining_payment": 19000,
+  "payment_status": "partial"
+}
+```
+
+---
+
+## Example Return Record
+
+```json
+{
+  "return_id": "R401",
+  "booking_id": "B301",
+  "actual_return_date": "2026-12-21",
+  "returned_items": [
+    {
+      "item_id": "I101",
+      "quantity": 200
+    },
+    {
+      "item_id": "I301",
+      "unit_id": "U501"
+    }
+  ],
+  "damaged_items": [],
+  "missing_items": [],
+  "late_fees": 0,
+  "damage_total": 0,
+  "missing_total": 0,
+  "refundable_adjustments": 0,
+  "booking_remaining_payment": 19000,
+  "final_balance": 19000,
+  "settlement_status": "customer_owes"
 }
 ```
 
@@ -310,23 +375,24 @@ Using separate files makes the system cleaner and easier to maintain.
 25. Record damaged items
 26. Record missing items
 27. Add late return charges
+28. Calculate final settlement
 
 ---
 
 ## Reporting Operations
 
-28. Generate monthly revenue report
-29. Generate damage/loss report
-30. Show currently rented items
-31. Show idle inventory items
+29. Generate monthly revenue report
+30. Generate damage/loss report
+31. Show currently rented items
+32. Show idle inventory items
 
 ---
 
 ## System Operations
 
-32. Save data automatically
-33. Load previous data at startup
-34. Exit program safely
+33. Save data automatically
+34. Load previous data at startup
+35. Exit program safely
 
 ---
 
@@ -350,7 +416,8 @@ Using separate files makes the system cleaner and easier to maintain.
 16. Delivery date after expected return date → reject booking.
 17. Same unique unit booked for overlapping dates → reject booking.
 18. Unique unit marked under maintenance → block booking.
-19. User exits suddenly during save → create backup file.
+19. Final settlement mismatch after return update → recalculate from booking_remaining_payment and return charges.
+20. User exits suddenly during save → create backup file.
 
 ---
 
