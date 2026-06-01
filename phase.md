@@ -178,6 +178,39 @@ At the end of this phase, the shop can run normal rental operations.
 * Search customer
 * View customer history
 
+## Phase 3 Completion Rules
+
+Each sub-phase must remain independently runnable and demoable.
+
+### Phase 3A Done When
+
+- Customer records can be added, searched, and persisted.
+- Program runs successfully without booking functionality.
+- Customer data survives restart.
+
+### Phase 3B Done When
+
+- Customers can create bookings.
+- Multiple items can be added to a booking.
+- Availability checks work correctly.
+- Program remains runnable without payment features.
+
+### Phase 3C Done When
+
+- Booking totals are calculated.
+- Deposits can be recorded.
+- Remaining balances are calculated.
+- Discounts and negotiated pricing are stored separately from standard rates.
+
+### Phase 3D Done When
+
+- Today's deliveries can be listed.
+- Today's collections can be listed.
+- Active bookings can be viewed.
+- Currently rented inventory can be displayed.
+
+Each sub-phase must be demonstrable without requiring later Phase 3 features.
+
 ### Files
 
 * customers.json
