@@ -1,0 +1,32 @@
+[
+    {
+        "item_id": "I101",
+        "item_name": "Plastic Chair",
+        "category": "Furniture",
+        "total_quantity": 400,
+        "standard_rent_per_day": 12,
+        "damage_charge": 250,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "I102",
+        "item_name": "Round Table",
+        "category": "Furniture",
+        "total_quantity": 100,
+        "standard_rent_per_day": 20,
+        "damage_charge": 300,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "I103",
+        "item_name": "Pedestal Fan",
+        "category": "Electrical",
+        "total_quantity": 50,
+        "standard_rent_per_day": 80.0,
+        "damage_charge": 1200.0,
+        "item_type": "limited",
+        "item_status": "active"
+    }
+]
