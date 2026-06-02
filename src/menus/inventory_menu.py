@@ -1,21 +1,32 @@
-from services.inventory_service import add_item, get_all_items, search_item, update_quantity
+from services.inventory_service import (
+    add_item,
+    get_all_items,
+    search_item,
+    update_quantity,
+    update_item_status
+)
+
 
 def show_inventory_summary():
-    items = get_all_items()
+    items = get_all_items(include_inactive=True)
 
     total_items = len(items)
+
     active_items = sum(
         1
         for item in items
         if item.get("item_status", "active") == "active"
     )
+
     inactive_items = total_items - active_items
+
     total_quantity = sum(
         item.get("total_quantity", 0)
         for item in items
     )
 
     categories = {}
+
     for item in items:
         category = item.get("category", "Unknown")
         categories[category] = categories.get(category, 0) + 1
@@ -27,6 +38,7 @@ def show_inventory_summary():
     print(f"Total Quantity: {total_quantity}")
 
     print("\nCategories:")
+
     for category, count in categories.items():
         print(f"- {category}: {count}")
 
@@ -40,23 +52,25 @@ def inventory_menu():
         print("2. View All Items")
         print("3. Search Item")
         print("4. Update Quantity")
-        print("5. Inventory Summary")
-        print("6. Exit")
+        print("5. Mark Item Inactive")
+        print("6. Inventory Summary")
+        print("7. Exit")
 
         choice = input("\nEnter choice: ")
 
         try:
+
             if choice == "1":
-                item_id = input("Item ID: ")
                 item_name = input("Item Name: ")
                 category = input("Category: ")
                 quantity = int(input("Quantity: "))
                 rent = float(input("Rent Per Day: "))
                 damage = float(input("Damage Charge: "))
-                item_type = input("Item Type (bulk/limited/unique): ")
+                item_type = input(
+                    "Item Type (bulk/limited/unique): "
+                )
 
-                add_item(
-                    item_id,
+                item = add_item(
                     item_name,
                     category,
                     quantity,
@@ -65,29 +79,39 @@ def inventory_menu():
                     item_type,
                 )
 
-                print("\nItem Added Successfully")
+                print(
+                    f"\nItem Added Successfully "
+                    f"with ID {item['item_id']}"
+                )
 
             elif choice == "2":
                 items = get_all_items()
 
                 if not items:
-                    print("\nNo inventory items found.")
+                    print("\nNo active inventory items found.")
                     continue
 
                 print("\n===== INVENTORY =====")
+
                 for item in items:
                     print("-" * 40)
                     print(f"ID: {item['item_id']}")
                     print(f"Name: {item['item_name']}")
                     print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
-                    print(f"Rent/Day: Rs.{item['standard_rent_per_day']}")
-                    print(f"Damage Charge: Rs.{item['damage_charge']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
                     print(f"Type: {item['item_type']}")
                     print(f"Status: {item['item_status']}")
 
             elif choice == "3":
-                name = input("Enter item name to search: ")
+                name = input(
+                    "Enter item name to search: "
+                )
 
                 results = search_item(name)
 
@@ -96,25 +120,90 @@ def inventory_menu():
                     continue
 
                 print("\n===== SEARCH RESULTS =====")
+
                 for item in results:
                     print("-" * 40)
                     print(f"ID: {item['item_id']}")
                     print(f"Name: {item['item_name']}")
+                    print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
+                    print(f"Type: {item['item_type']}")
+                    print(f"Status: {item['item_status']}")
+
+                print("\nActions")
+                print("1. Update Quantity")
+                print("2. Mark Item Inactive")
+                print("3. Back")
+
+                action = input("\nChoose action: ")
+
+                if action == "1":
+                    item_id = input("Enter Item ID: ")
+                    quantity = int(
+                        input("New Quantity: ")
+                    )
+
+                    update_quantity(
+                        item_id,
+                        quantity
+                    )
+
+                    print(
+                        "\nQuantity Updated Successfully"
+                    )
+
+                elif action == "2":
+                    item_id = input("Enter Item ID: ")
+
+                    update_item_status(
+                        item_id,
+                        "inactive"
+                    )
+
+                    print(
+                        "\nItem marked as inactive successfully"
+                    )
 
             elif choice == "4":
                 item_id = input("Enter Item ID: ")
-                quantity = int(input("New Quantity: "))
+                quantity = int(
+                    input("New Quantity: ")
+                )
 
-                update_quantity(item_id, quantity)
+                update_quantity(
+                    item_id,
+                    quantity
+                )
 
-                print("\nQuantity Updated Successfully")
+                print(
+                    "\nQuantity Updated Successfully"
+                )
 
             elif choice == "5":
-                show_inventory_summary()
+                item_id = input("Enter Item ID: ")
+
+                update_item_status(
+                    item_id,
+                    "inactive"
+                )
+
+                print(
+                    "\nItem marked as inactive successfully"
+                )
 
             elif choice == "6":
-                print("\nThank you for using Sharma Tent House System.")
+                show_inventory_summary()
+
+            elif choice == "7":
+                print(
+                    "\nThank you for using Sharma Tent House System."
+                )
                 break
 
             else:
@@ -122,4 +211,3 @@ def inventory_menu():
 
         except ValueError as error:
             print(f"\nError: {error}")
-

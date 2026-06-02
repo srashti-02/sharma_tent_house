@@ -11,3 +11,37 @@ def validate_quantity(quantity):
 def validate_price(price):
     if price < 0:
         raise ValueError("Price cannot be negative.")
+    
+def validate_item_id(item_id):
+    if not item_id.strip():
+        raise ValueError("Item ID cannot be empty.")
+
+
+def validate_category(category):
+    if not category.strip():
+        raise ValueError("Category cannot be empty.")
+
+
+def validate_item_type(item_type):
+    valid_types = [
+        "bulk",
+        "limited",
+        "unique"
+    ]
+
+    if item_type.lower() not in valid_types:
+        raise ValueError(
+            "Item type must be bulk, limited, or unique."
+        )
+
+
+def validate_item_status(item_status):
+    valid_statuses = [
+        "active",
+        "inactive"
+    ]
+
+    if item_status.lower() not in valid_statuses:
+        raise ValueError(
+            "Item status must be active or inactive."
+        )
