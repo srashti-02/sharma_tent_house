@@ -1,0 +1,23 @@
+[
+    {
+        "booking_id": "BOOKING_001",
+        "item_id": "ITEM_003",
+        "quantity": 100,
+        "delivery_date": "2026-06-10",
+        "return_date": "2026-06-18"
+    },
+    {
+        "booking_id": "BOOKING_002",
+        "item_id": "ITEM_004",
+        "quantity": 50,
+        "delivery_date": "2026-06-09",
+        "return_date": "2026-06-18"
+    },
+    {
+        "booking_id": "BOOKING_003",
+        "item_id": "ITEM_003",
+        "quantity": 350,
+        "delivery_date": "2026-06-11",
+        "return_date": "2026-06-17"
+    }
+]

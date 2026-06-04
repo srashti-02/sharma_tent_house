@@ -5,6 +5,14 @@ search_item,
 update_quantity,
 update_item_status
 )
+from services.booking_service import (
+    create_booking,
+    get_all_bookings
+)
+
+from services.availability_service import (
+    check_bulk_availability
+)
 
 def show_inventory_summary():
     items = get_all_items(include_inactive=True)
@@ -44,7 +52,10 @@ def inventory_menu():
         print("4. Update Quantity")
         print("5. Mark Item Inactive")
         print("6. Inventory Summary")
-        print("7. Exit")
+        print("7. Create Booking")
+        print("8. Check Availability")
+        print("9. View Bookings")
+        print("10. Exit")
 
         choice = input("\nEnter choice: ")
 
@@ -132,6 +143,46 @@ def inventory_menu():
                 show_inventory_summary()
 
             elif choice == "7":
+                item_id = input("Item ID: ")
+                quantity = int(input("Quantity: "))
+                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
+                return_date = input("Return Date (YYYY-MM-DD): ")
+
+                booking = create_booking(item_id, quantity, delivery_date, return_date)
+
+                print(f"\nBooking Created: {booking['booking_id']}")
+
+            elif choice == "8":
+                item_id = input("Item ID: ")
+                quantity = int(input("Quantity: "))
+                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
+                return_date = input("Return Date (YYYY-MM-DD): ")
+
+                result = check_bulk_availability(item_id, quantity, delivery_date, return_date)
+
+                print("\n===== AVAILABILITY =====")
+                print(f"Available Quantity: {result['available_quantity']}")
+                if result.get("available"):
+                    print("Status: AVAILABLE")
+                else:
+                    print("Status: NOT AVAILABLE")
+
+            elif choice == "9":
+                bookings = get_all_bookings()
+                if not bookings:
+                    print("\nNo bookings found.")
+                    continue
+
+                print("\n===== BOOKINGS =====")
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking ID: {booking['booking_id']}")
+                    print(f"Item ID: {booking['item_id']}")
+                    print(f"Quantity: {booking['quantity']}")
+                    print(f"Delivery: {booking['delivery_date']}")
+                    print(f"Return: {booking['return_date']}")
+
+            elif choice == "10":
                 print("\nThank you for using Sharma Tent House System.")
                 break
 

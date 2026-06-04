@@ -1,29 +1,40 @@
 import json
 from pathlib import Path
 
-DATA_FILE = Path("data/inventory.json")
+INVENTORY_FILE = Path("data/inventory.json")
+BOOKINGS_FILE = Path("data/bookings.json")
 
 
-def load_inventory():
-    """
-    Load inventory data from JSON file.
-    """
+def _load_json(file_path: Path):
+    # Ensure directory and file exist
+    if not file_path.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text("[]")
+
     try:
-        if not DATA_FILE.exists():
-            DATA_FILE.parent.mkdir(exist_ok=True)
-            DATA_FILE.write_text("[]")
-
-        with open(DATA_FILE, "r") as file:
+        with file_path.open("r", encoding="utf-8") as file:
             return json.load(file)
-
     except json.JSONDecodeError:
-        print("Error: inventory.json is corrupted.")
+        print(f"Error: {file_path.name} is corrupted.")
         return []
 
 
+def _save_json(file_path: Path, data):
+    with file_path.open("w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
+
+
+def load_inventory():
+    return _load_json(INVENTORY_FILE)
+
+
 def save_inventory(inventory):
-    """
-    Save inventory data to JSON file.
-    """
-    with open(DATA_FILE, "w") as file:
-        json.dump(inventory, file, indent=4)
+    _save_json(INVENTORY_FILE, inventory)
+
+
+def load_bookings():
+    return _load_json(BOOKINGS_FILE)
+
+
+def save_bookings(bookings):
+    _save_json(BOOKINGS_FILE, bookings)
