@@ -18,5 +18,25 @@
         "damage_charge": 200,
         "item_type": "bulk",
         "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_003",
+        "item_name": "Plastic Chair",
+        "category": "Furniture",
+        "total_quantity": 500,
+        "standard_rent_per_day": 20.0,
+        "damage_charge": 250.0,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_004",
+        "item_name": "Wood Chair",
+        "category": "Furniture",
+        "total_quantity": 200,
+        "standard_rent_per_day": 15.0,
+        "damage_charge": 300.0,
+        "item_type": "bulk",
+        "item_status": "active"
     }
 ]

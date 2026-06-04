@@ -1,5 +1,5 @@
-from src.storage.json_storage import load_inventory, save_inventory
-from src.utils.validators import (
+from storage.json_storage import load_inventory, save_inventory
+from utils.validators import (
     validate_item_name,
     validate_category,
     validate_quantity,
