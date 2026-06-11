@@ -5,6 +5,11 @@ search_item,
 update_quantity,
 update_item_status
 )
+from services.customer_service import (
+    add_customer,
+    get_all_customers,
+    search_customer
+)
 from services.booking_service import (
     create_booking,
     get_all_bookings
@@ -52,10 +57,13 @@ def inventory_menu():
         print("4. Update Quantity")
         print("5. Mark Item Inactive")
         print("6. Inventory Summary")
-        print("7. Create Booking")
-        print("8. Check Availability")
-        print("9. View Bookings")
-        print("10. Exit")
+        print("7. Add Customer")
+        print("8. Search Customer")
+        print("9. View Customers")
+        print("10. Create Booking")
+        print("11. Check Availability")
+        print("12. View Bookings")
+        print("13. Exit")
 
         choice = input("\nEnter choice: ")
 
@@ -68,122 +76,290 @@ def inventory_menu():
                 damage = float(input("Damage Charge: "))
                 item_type = input("Item Type (bulk/limited/unique): ")
 
-                item = add_item(item_name, category, quantity, rent, damage, item_type)
-                print(f"\nItem Added Successfully with ID {item['item_id']}")
+                item = add_item(
+                    item_name,
+                    category,
+                    quantity,
+                    rent,
+                    damage,
+                    item_type
+                )
+
+                print(
+                    f"\nItem Added Successfully with ID "
+                    f"{item['item_id']}"
+                )
 
             elif choice == "2":
                 items = get_all_items()
+
                 if not items:
                     print("\nNo active inventory items found.")
                     continue
+
                 print("\n===== INVENTORY =====")
+
                 for item in items:
                     print("-" * 40)
                     print(f"ID: {item['item_id']}")
                     print(f"Name: {item['item_name']}")
                     print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
-                    print(f"Rent/Day: Rs.{item['standard_rent_per_day']}")
-                    print(f"Damage Charge: Rs.{item['damage_charge']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
                     print(f"Type: {item['item_type']}")
                     print(f"Status: {item['item_status']}")
 
             elif choice == "3":
                 name = input("Enter item name to search: ")
+
                 results = search_item(name)
+
                 if not results:
                     print("\nNo item found.")
                     continue
+
                 print("\n===== SEARCH RESULTS =====")
+
                 for index, item in enumerate(results, start=1):
                     print("-" * 40)
                     print(f"{index}. {item['item_name']}")
                     print(f"ID: {item['item_id']}")
                     print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
-                    print(f"Rent/Day: Rs.{item['standard_rent_per_day']}")
-                    print(f"Damage Charge: Rs.{item['damage_charge']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
                     print(f"Type: {item['item_type']}")
                     print(f"Status: {item['item_status']}")
 
-                selection = int(input("\nSelect item number (0 to go back): "))
+                selection = int(
+                    input("\nSelect item number (0 to go back): ")
+                )
+
                 if selection == 0:
                     continue
+
                 if selection < 1 or selection > len(results):
                     print("\nInvalid selection.")
                     continue
 
                 selected_item = results[selection - 1]
+
                 print("\nActions")
                 print("1. Update Quantity")
                 print("2. Mark Item Inactive")
                 print("3. Back")
 
                 action = input("\nChoose action: ")
+
                 if action == "1":
                     quantity = int(input("New Quantity: "))
-                    update_quantity(selected_item["item_id"], quantity)
-                    print("\nQuantity Updated Successfully")
+
+                    update_quantity(
+                        selected_item["item_id"],
+                        quantity
+                    )
+
+                    print(
+                        "\nQuantity Updated Successfully"
+                    )
+
                 elif action == "2":
-                    update_item_status(selected_item["item_id"], "inactive")
-                    print("\nItem marked as inactive successfully")
+                    update_item_status(
+                        selected_item["item_id"],
+                        "inactive"
+                    )
+
+                    print(
+                        "\nItem marked as inactive successfully"
+                    )
 
             elif choice == "4":
                 item_id = input("Enter Item ID: ")
                 quantity = int(input("New Quantity: "))
+
                 update_quantity(item_id, quantity)
+
                 print("\nQuantity Updated Successfully")
 
             elif choice == "5":
                 item_id = input("Enter Item ID: ")
-                update_item_status(item_id, "inactive")
-                print("\nItem marked as inactive successfully")
+
+                update_item_status(
+                    item_id,
+                    "inactive"
+                )
+
+                print(
+                    "\nItem marked as inactive successfully"
+                )
 
             elif choice == "6":
                 show_inventory_summary()
 
             elif choice == "7":
-                item_id = input("Item ID: ")
-                quantity = int(input("Quantity: "))
-                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
-                return_date = input("Return Date (YYYY-MM-DD): ")
+                customer_name = input("Customer Name: ")
+                phone = input("Phone: ")
+                address = input("Address: ")
 
-                booking = create_booking(item_id, quantity, delivery_date, return_date)
+                customer = add_customer(
+                    customer_name,
+                    phone,
+                    address
+                )
 
-                print(f"\nBooking Created: {booking['booking_id']}")
+                print(
+                    f"\nCustomer Added Successfully "
+                    f"with ID {customer['customer_id']}"
+                )
 
             elif choice == "8":
+                name = input(
+                    "Enter customer name: "
+                )
+
+                customers = search_customer(name)
+
+                if not customers:
+                    print("\nNo customer found.")
+                    continue
+
+                print("\n===== CUSTOMERS =====")
+
+                for customer in customers:
+                    print("-" * 40)
+                    print(
+                        f"ID: {customer['customer_id']}"
+                    )
+                    print(
+                        f"Name: {customer['customer_name']}"
+                    )
+                    print(
+                        f"Phone: {customer['phone']}"
+                    )
+                    print(
+                        f"Address: {customer['address']}"
+                    )
+
+            elif choice == "9":
+                customers = get_all_customers()
+
+                if not customers:
+                    print("\nNo customers found.")
+                    continue
+
+                print("\n===== ALL CUSTOMERS =====")
+
+                for customer in customers:
+                    print("-" * 40)
+                    print(
+                        f"ID: {customer['customer_id']}"
+                    )
+                    print(
+                        f"Name: {customer['customer_name']}"
+                    )
+                    print(
+                        f"Phone: {customer['phone']}"
+                    )
+                    print(
+                        f"Address: {customer['address']}"
+                    )
+
+            elif choice == "10":
                 item_id = input("Item ID: ")
                 quantity = int(input("Quantity: "))
-                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
-                return_date = input("Return Date (YYYY-MM-DD): ")
+                delivery_date = input(
+                    "Delivery Date (YYYY-MM-DD): "
+                )
+                return_date = input(
+                    "Return Date (YYYY-MM-DD): "
+                )
 
-                result = check_bulk_availability(item_id, quantity, delivery_date, return_date)
+                booking = create_booking(
+                    item_id,
+                    quantity,
+                    delivery_date,
+                    return_date
+                )
+
+                print(
+                    f"\nBooking Created: "
+                    f"{booking['booking_id']}"
+                )
+
+            elif choice == "11":
+                item_id = input("Item ID: ")
+                quantity = int(input("Quantity: "))
+                delivery_date = input(
+                    "Delivery Date (YYYY-MM-DD): "
+                )
+                return_date = input(
+                    "Return Date (YYYY-MM-DD): "
+                )
+
+                result = check_bulk_availability(
+                    item_id,
+                    quantity,
+                    delivery_date,
+                    return_date
+                )
 
                 print("\n===== AVAILABILITY =====")
-                print(f"Available Quantity: {result['available_quantity']}")
+                print(
+                    f"Available Quantity: "
+                    f"{result['available_quantity']}"
+                )
+
                 if result.get("available"):
                     print("Status: AVAILABLE")
                 else:
                     print("Status: NOT AVAILABLE")
 
-            elif choice == "9":
+            elif choice == "12":
                 bookings = get_all_bookings()
+
                 if not bookings:
                     print("\nNo bookings found.")
                     continue
 
                 print("\n===== BOOKINGS =====")
+
                 for booking in bookings:
                     print("-" * 40)
-                    print(f"Booking ID: {booking['booking_id']}")
-                    print(f"Item ID: {booking['item_id']}")
-                    print(f"Quantity: {booking['quantity']}")
-                    print(f"Delivery: {booking['delivery_date']}")
-                    print(f"Return: {booking['return_date']}")
+                    print(
+                        f"Booking ID: "
+                        f"{booking['booking_id']}"
+                    )
+                    print(
+                        f"Item ID: "
+                        f"{booking['item_id']}"
+                    )
+                    print(
+                        f"Quantity: "
+                        f"{booking['quantity']}"
+                    )
+                    print(
+                        f"Delivery: "
+                        f"{booking['delivery_date']}"
+                    )
+                    print(
+                        f"Return: "
+                        f"{booking['return_date']}"
+                    )
 
-            elif choice == "10":
-                print("\nThank you for using Sharma Tent House System.")
+            elif choice == "13":
+                print(
+                    "\nThank you for using "
+                    "Sharma Tent House System."
+                )
                 break
 
             else:
@@ -191,4 +367,3 @@ def inventory_menu():
 
         except ValueError as error:
             print(f"\nError: {error}")
-
