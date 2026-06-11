@@ -37,6 +37,7 @@ def generate_booking_id():
 
 
 def create_booking(
+    customer_id,
     item_id,
     quantity,
     delivery_date,
@@ -59,10 +60,12 @@ def create_booking(
 
     booking = {
         "booking_id": generate_booking_id(),
+        "customer_id": customer_id,
         "item_id": item_id,
         "quantity": quantity,
         "delivery_date": delivery_date,
-        "return_date": return_date
+        "return_date": return_date,
+        "booking_status": "active"
     }
 
     bookings.append(booking)
@@ -74,3 +77,26 @@ def create_booking(
 
 def get_all_bookings():
     return load_bookings()
+
+def get_customer_bookings(customer_id):
+    bookings = load_bookings()
+
+    return [
+        booking
+        for booking in bookings
+        if booking.get("customer_id") == customer_id
+    ]
+
+
+def cancel_booking(booking_id):
+    bookings = load_bookings()
+
+    for booking in bookings:
+        if booking["booking_id"] == booking_id:
+            booking["booking_status"] = "cancelled"
+
+            save_bookings(bookings)
+
+            return booking
+
+    raise ValueError("Booking not found.")

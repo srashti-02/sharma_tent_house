@@ -8,7 +8,8 @@ update_item_status
 from services.customer_service import (
     add_customer,
     get_all_customers,
-    search_customer
+    search_customer,
+    get_customer_history
 )
 from services.booking_service import (
     create_booking,
@@ -63,7 +64,8 @@ def inventory_menu():
         print("10. Create Booking")
         print("11. Check Availability")
         print("12. View Bookings")
-        print("13. Exit")
+        print("13. View Customer History")
+        print("14. Exit")
 
         choice = input("\nEnter choice: ")
 
@@ -274,16 +276,20 @@ def inventory_menu():
                     )
 
             elif choice == "10":
+                customer_id = input("Customer ID: ")
                 item_id = input("Item ID: ")
                 quantity = int(input("Quantity: "))
+
                 delivery_date = input(
                     "Delivery Date (YYYY-MM-DD): "
                 )
+
                 return_date = input(
                     "Return Date (YYYY-MM-DD): "
                 )
 
                 booking = create_booking(
+                    customer_id,
                     item_id,
                     quantity,
                     delivery_date,
@@ -298,9 +304,11 @@ def inventory_menu():
             elif choice == "11":
                 item_id = input("Item ID: ")
                 quantity = int(input("Quantity: "))
+
                 delivery_date = input(
                     "Delivery Date (YYYY-MM-DD): "
                 )
+
                 return_date = input(
                     "Return Date (YYYY-MM-DD): "
                 )
@@ -339,6 +347,56 @@ def inventory_menu():
                         f"{booking['booking_id']}"
                     )
                     print(
+                        f"Customer ID: "
+                        f"{booking.get('customer_id', 'N/A')}"
+                    )
+                    print(
+                        f"Item ID: "
+                        f"{booking['item_id']}"
+                    )
+                    print(
+                        f"Status: "
+                        f"{booking.get('booking_status', 'active')}"
+                    )
+                    print(
+                        f"Quantity: "
+                        f"{booking['quantity']}"
+                    )
+                    print(
+                        f"Delivery: "
+                        f"{booking['delivery_date']}"
+                    )
+                    print(
+                        f"Return: "
+                        f"{booking['return_date']}"
+                    )
+
+            elif choice == "13":
+                customer_id = input(
+                    "Customer ID: "
+                )
+
+                bookings = get_customer_history(
+                    customer_id
+                )
+
+                if not bookings:
+                    print(
+                        "\nNo bookings found for customer."
+                    )
+                    continue
+
+                print(
+                    "\n===== CUSTOMER HISTORY ====="
+                )
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(
+                        f"Booking ID: "
+                        f"{booking['booking_id']}"
+                    )
+                    print(
                         f"Item ID: "
                         f"{booking['item_id']}"
                     )
@@ -355,7 +413,7 @@ def inventory_menu():
                         f"{booking['return_date']}"
                     )
 
-            elif choice == "13":
+            elif choice == "14":
                 print(
                     "\nThank you for using "
                     "Sharma Tent House System."

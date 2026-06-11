@@ -19,5 +19,23 @@
         "quantity": 350,
         "delivery_date": "2026-06-11",
         "return_date": "2026-06-17"
+    },
+    {
+        "booking_id": "BOOKING_004",
+        "customer_id": "CUST_001",
+        "item_id": "ITEM_003",
+        "quantity": 50,
+        "delivery_date": "2026-06-20",
+        "return_date": "2026-06-22",
+        "booking_status": "active"
+    },
+    {
+        "booking_id": "BOOKING_005",
+        "customer_id": "CUST_001",
+        "item_id": "ITEM_004",
+        "quantity": 20,
+        "delivery_date": "2026-06-25",
+        "return_date": "2026-06-27",
+        "booking_status": "active"
     }
 ]
