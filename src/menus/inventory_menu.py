@@ -19,7 +19,8 @@ from services.customer_service import (
 )
 from services.booking_service import (
     create_booking,
-    get_all_bookings
+    get_all_bookings,
+    cancel_booking
 )
 
 from services.availability_service import (
@@ -34,7 +35,8 @@ from services.return_service import (
     process_return,
     record_damage,
     record_missing_items,
-    calculate_settlement
+    calculate_settlement,
+    calculate_late_fee
 )
 
 def show_inventory_summary():
@@ -93,7 +95,10 @@ def inventory_menu():
         print("22. Record Damage")
         print("23. Record Missing Items")
         print("24. Settlement Summary")
-        print("25. Exit")
+        print("25. Calculate Late Fee")
+        print("26. Cancel Booking")
+        print("27. Returned Bookings")
+        print("28. Exit")
     
 
         choice = input("\nEnter choice: ")
@@ -686,17 +691,106 @@ def inventory_menu():
                 )
 
                 print(
+                    f"Late Fee: "
+                    f"{booking.get('late_fee', 0)}"
+                )
+
+                print(
                     f"Settlement Total: "
                     f"{booking.get('settlement_total', 0)}"
                 )
 
             elif choice == "25":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                booking = calculate_late_fee(
+                    booking_id
+                )
+
+                print(
+                    "\nLate Fee Calculated"
+                )
+
+                print(
+                    f"Late Days: "
+                    f"{booking.get('late_days', 0)}"
+                )
+
+                print(
+                    f"Late Fee: "
+                    f"{booking.get('late_fee', 0)}"
+                )
+
+            elif choice == "26":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                booking = cancel_booking(
+                    booking_id
+                )
+
+                print(
+                    "\nBooking Cancelled Successfully"
+                )
+
+                print(
+                    f"Status: "
+                    f"{booking['booking_status']}"
+                )
+
+            elif choice == "27":
+                bookings = get_all_bookings()
+
+                print(
+                    "\n===== RETURNED BOOKINGS ====="
+                )
+
+                found = False
+
+                for booking in bookings:
+
+                    if booking.get(
+                        "booking_status"
+                    ) == "returned":
+
+                        found = True
+
+                        print("-" * 40)
+
+                        print(
+                            f"Booking ID: "
+                            f"{booking['booking_id']}"
+                        )
+
+                        print(
+                            f"Customer ID: "
+                            f"{booking.get('customer_id', 'N/A')}"
+                        )
+
+                        print(
+                            f"Returned On: "
+                            f"{booking.get('actual_return_date')}"
+                        )
+
+                        print(
+                            f"Settlement: "
+                            f"{booking.get('settlement_total', 0)}"
+                        )
+
+                if not found:
+                    print(
+                        "No returned bookings found."
+                    )
+
+            elif choice == "28":
                 print("\nExiting Inventory Menu...")
                 break
 
             else:
                 print("\nInvalid choice. Please try again.")
         except Exception as e:
-            print(f"\nAn error occurred: {e}")
+            print(f"\nError: {e}")
             continue
-

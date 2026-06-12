@@ -36,7 +36,7 @@
         "quantity": 20,
         "delivery_date": "2026-06-25",
         "return_date": "2026-06-27",
-        "booking_status": "active"
+        "booking_status": "cancelled"
     },
     {
         "booking_id": "BOOKING_006",
@@ -57,6 +57,8 @@
         "damage_fee": 500.0,
         "missing_quantity": 1,
         "replacement_fee": 1000.0,
-        "settlement_total": 1500.0
+        "settlement_total": 1600.0,
+        "late_days": 1,
+        "late_fee": 100
     }
 ]

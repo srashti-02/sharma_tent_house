@@ -118,5 +118,35 @@
         "damage_charge": 200,
         "item_type": "bulk",
         "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_013",
+        "item_name": "Test Chair",
+        "category": "Furniture",
+        "total_quantity": 100,
+        "standard_rent_per_day": 50,
+        "damage_charge": 200,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_014",
+        "item_name": "Test Chair",
+        "category": "Furniture",
+        "total_quantity": 100,
+        "standard_rent_per_day": 50,
+        "damage_charge": 200,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_015",
+        "item_name": "Test Chair",
+        "category": "Furniture",
+        "total_quantity": 100,
+        "standard_rent_per_day": 50,
+        "damage_charge": 200,
+        "item_type": "bulk",
+        "item_status": "active"
     }
 ]

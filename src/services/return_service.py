@@ -89,6 +89,63 @@ def record_missing_items(
     )
 
 
+def calculate_late_fee(
+    booking_id,
+    daily_late_fee=100
+):
+    bookings = load_bookings()
+
+    for booking in bookings:
+
+        if booking["booking_id"] == booking_id:
+
+            actual_return = booking.get(
+                "actual_return_date"
+            )
+
+            if not actual_return:
+                raise ValueError(
+                    "Booking not returned yet."
+                )
+
+            expected_date = datetime.strptime(
+                booking["return_date"],
+                "%Y-%m-%d"
+            )
+
+            actual_date = datetime.strptime(
+                actual_return,
+                "%Y-%m-%d"
+            )
+
+            late_days = (
+                actual_date - expected_date
+            ).days
+
+            if late_days < 0:
+                late_days = 0
+
+            late_fee = (
+                late_days * daily_late_fee
+            )
+
+            booking["late_days"] = (
+                late_days
+            )
+
+            booking["late_fee"] = (
+                late_fee
+            )
+
+            save_bookings(bookings)
+
+            return booking
+
+    raise ValueError(
+        "Booking not found."
+    )
+
+
 def calculate_settlement(
     booking_id
 ):
@@ -113,10 +170,16 @@ def calculate_settlement(
                 0
             )
 
+            late_fee = booking.get(
+                "late_fee",
+                0
+            )
+
             settlement_total = (
                 balance_due
                 + damage_fee
                 + replacement_fee
+                + late_fee
             )
 
             booking["settlement_total"] = (
