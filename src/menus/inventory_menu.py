@@ -30,6 +30,12 @@ from services.payment_service import (
     record_deposit,
     get_payment_summary
 )
+from services.return_service import (
+    process_return,
+    record_damage,
+    record_missing_items,
+    calculate_settlement
+)
 
 def show_inventory_summary():
     items = get_all_items(include_inactive=True)
@@ -83,7 +89,11 @@ def inventory_menu():
         print("18. Today's Collections")
         print("19. Active Bookings")
         print("20. Currently Rented Inventory")
-        print("21. Exit")
+        print("21. Return Booking")
+        print("22. Record Damage")
+        print("23. Record Missing Items")
+        print("24. Settlement Summary")
+        print("25. Exit")
     
 
         choice = input("\nEnter choice: ")
@@ -578,9 +588,109 @@ def inventory_menu():
                 for item_id, quantity in inventory.items():
                     print(f"{item_id}: {quantity}")
 
-
-
             elif choice == "21":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                actual_return_date = input(
+                    "Actual Return Date (YYYY-MM-DD): "
+                )
+
+                booking = process_return(
+                    booking_id,
+                    actual_return_date
+                )
+
+                print(
+                    "\nBooking Returned Successfully"
+                )
+
+                print(
+                    f"Status: "
+                    f"{booking['booking_status']}"
+                )
+
+            elif choice == "22":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                damaged_quantity = int(
+                    input("Damaged Quantity: ")
+                )
+
+                damage_fee = float(
+                    input("Damage Fee: ")
+                )
+
+                record_damage(
+                    booking_id,
+                    damaged_quantity,
+                    damage_fee
+                )
+
+                print(
+                    "\nDamage Recorded Successfully"
+                )
+
+            elif choice == "23":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                missing_quantity = int(
+                    input("Missing Quantity: ")
+                )
+
+                replacement_fee = float(
+                    input("Replacement Fee: ")
+                )
+
+                record_missing_items(
+                    booking_id,
+                    missing_quantity,
+                    replacement_fee
+                )
+
+                print(
+                    "\nMissing Items Recorded Successfully"
+                )
+
+            elif choice == "24":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                booking = calculate_settlement(
+                    booking_id
+                )
+
+                print(
+                    "\n===== SETTLEMENT ====="
+                )
+
+                print(
+                    f"Balance Due: "
+                    f"{booking.get('balance_due', 0)}"
+                )
+
+                print(
+                    f"Damage Fee: "
+                    f"{booking.get('damage_fee', 0)}"
+                )
+
+                print(
+                    f"Replacement Fee: "
+                    f"{booking.get('replacement_fee', 0)}"
+                )
+
+                print(
+                    f"Settlement Total: "
+                    f"{booking.get('settlement_total', 0)}"
+                )
+
+            elif choice == "25":
                 print("\nExiting Inventory Menu...")
                 break
 
