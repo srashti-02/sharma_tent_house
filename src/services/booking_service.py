@@ -7,6 +7,10 @@ from services.availability_service import (
     check_bulk_availability
 )
 
+from services.inventory_service import (
+    get_all_items
+)
+
 
 def generate_booking_id():
     bookings = load_bookings()
@@ -56,6 +60,20 @@ def create_booking(
             f"Only {availability['available_quantity']} left."
         )
 
+    inventory_items = get_all_items()
+
+    rent = None
+
+    for item in inventory_items:
+        if item["item_id"] == item_id:
+            rent = item["standard_rent_per_day"]
+            break
+
+    if rent is None:
+        raise ValueError("Item not found.")
+
+    standard_total = rent * quantity
+
     bookings = load_bookings()
 
     booking = {
@@ -65,7 +83,15 @@ def create_booking(
         "quantity": quantity,
         "delivery_date": delivery_date,
         "return_date": return_date,
-        "booking_status": "active"
+        "booking_status": "active",
+
+        # Phase 3C
+        "standard_total": standard_total,
+        "discount": 0,
+        "final_total": standard_total,
+        "deposit_paid": 0,
+        "balance_due": standard_total,
+        "payment_status": "pending"
     }
 
     bookings.append(booking)
@@ -77,6 +103,7 @@ def create_booking(
 
 def get_all_bookings():
     return load_bookings()
+
 
 def get_customer_bookings(customer_id):
     bookings = load_bookings()

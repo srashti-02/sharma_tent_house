@@ -19,6 +19,11 @@ from services.booking_service import (
 from services.availability_service import (
     check_bulk_availability
 )
+from services.payment_service import (
+    apply_discount,
+    record_deposit,
+    get_payment_summary
+)
 
 def show_inventory_summary():
     items = get_all_items(include_inactive=True)
@@ -65,7 +70,10 @@ def inventory_menu():
         print("11. Check Availability")
         print("12. View Bookings")
         print("13. View Customer History")
-        print("14. Exit")
+        print("14. Apply Discount")
+        print("15. Record Deposit")
+        print("16. Payment Summary")
+        print("17. Exit")
 
         choice = input("\nEnter choice: ")
 
@@ -414,14 +422,104 @@ def inventory_menu():
                     )
 
             elif choice == "14":
-                print(
-                    "\nThank you for using "
-                    "Sharma Tent House System."
+                booking_id = input(
+                    "Booking ID: "
                 )
+
+                discount = float(
+                    input("Discount Amount: ")
+                )
+
+                booking = apply_discount(
+                    booking_id,
+                    discount
+                )
+
+                print(
+                    "\nDiscount Applied Successfully"
+                )
+
+                print(
+                    f"Final Total: "
+                    f"{booking['final_total']}"
+                )
+
+            elif choice == "15":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                amount = float(
+                    input("Deposit Amount: ")
+                )
+
+                booking = record_deposit(
+                    booking_id,
+                    amount
+                )
+
+                print(
+                    "\nDeposit Recorded Successfully"
+                )
+
+                print(
+                    f"Balance Due: "
+                    f"{booking['balance_due']}"
+                )
+
+            elif choice == "16":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                booking = get_payment_summary(
+                    booking_id
+                )
+
+                print("\n===== PAYMENT SUMMARY =====")
+
+                print(
+                    f"Booking ID: "
+                    f"{booking['booking_id']}"
+                )
+
+                print(
+                    f"Standard Total: "
+                    f"{booking.get('standard_total', 0)}"
+                )
+
+                print(
+                    f"Discount: "
+                    f"{booking.get('discount', 0)}"
+                )
+
+                print(
+                    f"Final Total: "
+                    f"{booking.get('final_total', 0)}"
+                )
+
+                print(
+                    f"Deposit Paid: "
+                    f"{booking.get('deposit_paid', 0)}"
+                )
+
+                print(
+                    f"Balance Due: "
+                    f"{booking.get('balance_due', 0)}"
+                )
+
+                print(
+                    f"Payment Status: "
+                    f"{booking.get('payment_status', 'pending')}"
+                )
+
+            elif choice == "17":
+                print("\nExiting Inventory Menu...")
                 break
 
             else:
-                print("\nInvalid option.")
+                print("\nInvalid choice. Please try again.")
+        except Exception as e:
+            print(f"\nAn error occurred: {e}")
+            continue
 
-        except ValueError as error:
-            print(f"\nError: {error}")

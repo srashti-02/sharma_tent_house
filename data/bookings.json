@@ -37,5 +37,20 @@
         "delivery_date": "2026-06-25",
         "return_date": "2026-06-27",
         "booking_status": "active"
+    },
+    {
+        "booking_id": "BOOKING_006",
+        "customer_id": "CUST_001",
+        "item_id": "ITEM_004",
+        "quantity": 10,
+        "delivery_date": "2026-07-01",
+        "return_date": "2026-07-03",
+        "booking_status": "active",
+        "standard_total": 150.0,
+        "discount": 50.0,
+        "final_total": 100.0,
+        "deposit_paid": 100.0,
+        "balance_due": 0.0,
+        "payment_status": "paid"
     }
 ]
