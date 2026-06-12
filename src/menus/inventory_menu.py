@@ -5,6 +5,12 @@ search_item,
 update_quantity,
 update_item_status
 )
+from services.operations_service import (
+    get_todays_deliveries,
+    get_todays_collections,
+    get_active_bookings,
+    get_rented_inventory
+)
 from services.customer_service import (
     add_customer,
     get_all_customers,
@@ -73,7 +79,12 @@ def inventory_menu():
         print("14. Apply Discount")
         print("15. Record Deposit")
         print("16. Payment Summary")
-        print("17. Exit")
+        print("17. Today's Deliveries")
+        print("18. Today's Collections")
+        print("19. Active Bookings")
+        print("20. Currently Rented Inventory")
+        print("21. Exit")
+    
 
         choice = input("\nEnter choice: ")
 
@@ -512,8 +523,64 @@ def inventory_menu():
                     f"Payment Status: "
                     f"{booking.get('payment_status', 'pending')}"
                 )
-
             elif choice == "17":
+                bookings = get_todays_deliveries()
+
+                print("\n===== TODAY'S DELIVERIES =====")
+
+                if not bookings:
+                    print("No deliveries today.")
+                    continue
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking: {booking['booking_id']}")
+                    print(f"Customer: {booking.get('customer_id', 'N/A')}")
+
+            elif choice == "18":
+                bookings = get_todays_collections()
+
+                print("\n===== TODAY'S COLLECTIONS =====")
+
+                if not bookings:
+                    print("No collections today.")
+                    continue
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking: {booking['booking_id']}")
+                    print(f"Customer: {booking.get('customer_id', 'N/A')}")
+
+            elif choice == "19":
+                bookings = get_active_bookings()
+
+                print("\n===== ACTIVE BOOKINGS =====")
+
+                if not bookings:
+                    print("No active bookings found.")
+                    continue
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking ID: {booking['booking_id']}")
+                    print(f"Customer ID: {booking.get('customer_id', 'N/A')}")
+                    print(f"Item ID: {booking.get('item_id', 'N/A')}")
+
+            elif choice == "20":
+                inventory = get_rented_inventory()
+
+                print("\n===== RENTED INVENTORY =====")
+
+                if not inventory:
+                    print("No inventory currently rented.")
+                    continue
+
+                for item_id, quantity in inventory.items():
+                    print(f"{item_id}: {quantity}")
+
+
+
+            elif choice == "21":
                 print("\nExiting Inventory Menu...")
                 break
 
