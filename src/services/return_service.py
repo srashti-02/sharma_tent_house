@@ -5,7 +5,6 @@ from storage.json_storage import (
     save_bookings
 )
 
-
 def process_return(
     booking_id,
     actual_return_date

@@ -30,6 +30,21 @@ from services.payment_service import (
     record_deposit,
     get_payment_summary
 )
+from services.return_service import (
+    process_return,
+    record_damage,
+    record_missing_items,
+    calculate_late_fee,
+    calculate_settlement
+)
+
+from services.report_service import (
+    revenue_report,
+    damage_report,
+    missing_inventory_report,
+    inventory_utilization_report,
+    returned_booking_report
+)
 
 def show_inventory_summary():
     items = get_all_items(include_inactive=True)
@@ -83,7 +98,17 @@ def inventory_menu():
         print("18. Today's Collections")
         print("19. Active Bookings")
         print("20. Currently Rented Inventory")
-        print("21. Exit")
+        print("21. Return Booking")
+        print("22. Record Damage")
+        print("23. Record Missing Items")
+        print("24. Settlement Summary")
+        print("25. Calculate Late Fee")
+        print("26. Revenue Report")
+        print("27. Damage Report")
+        print("28. Missing Inventory Report")
+        print("29. Inventory Utilization")
+        print("30. Returned Booking Report")
+        print("31. Exit")
     
 
         choice = input("\nEnter choice: ")
@@ -578,9 +603,164 @@ def inventory_menu():
                 for item_id, quantity in inventory.items():
                     print(f"{item_id}: {quantity}")
 
-
-
             elif choice == "21":
+                booking_id = input("Booking ID: ")
+                actual_return_date = input(
+                    "Actual Return Date (YYYY-MM-DD): "
+                )
+
+                booking = process_return(
+                    booking_id,
+                    actual_return_date
+                )
+
+                print("\nBooking Returned Successfully")
+                print(
+                    f"Status: {booking['booking_status']}"
+                )
+
+            elif choice == "22":
+                booking_id = input("Booking ID: ")
+
+                damaged_quantity = int(
+                    input("Damaged Quantity: ")
+                )
+
+                damage_fee = float(
+                    input("Damage Fee: ")
+                )
+
+                record_damage(
+                    booking_id,
+                    damaged_quantity,
+                    damage_fee
+                )
+
+                print("\nDamage Recorded Successfully")
+
+            elif choice == "23":
+                booking_id = input("Booking ID: ")
+
+                missing_quantity = int(
+                    input("Missing Quantity: ")
+                )
+
+                replacement_fee = float(
+                    input("Replacement Fee: ")
+                )
+
+                record_missing_items(
+                    booking_id,
+                    missing_quantity,
+                    replacement_fee
+                )
+
+                print(
+                    "\nMissing Items Recorded Successfully"
+                )
+
+            elif choice == "24":
+                booking_id = input("Booking ID: ")
+
+                booking = calculate_settlement(
+                    booking_id
+                )
+
+                print("\n===== SETTLEMENT =====")
+                print(
+                    f"Settlement Total: "
+                    f"{booking.get('settlement_total', 0)}"
+                )
+
+            elif choice == "25":
+                booking_id = input("Booking ID: ")
+
+                booking = calculate_late_fee(
+                    booking_id
+                )
+
+                print("\n===== LATE FEE =====")
+                print(
+                    f"Late Days: "
+                    f"{booking.get('late_days', 0)}"
+                )
+                print(
+                    f"Late Fee: "
+                    f"{booking.get('late_fee', 0)}"
+                )
+
+            elif choice == "26":
+                report = revenue_report()
+
+                print("\n===== REVENUE REPORT =====")
+                print(
+                    f"Revenue: "
+                    f"{report['total_revenue']}"
+                )
+                print(
+                    f"Deposits: "
+                    f"{report['total_deposits']}"
+                )
+                print(
+                    f"Outstanding: "
+                    f"{report['outstanding_balance']}"
+                )
+
+            elif choice == "27":
+                report = damage_report()
+
+                print("\n===== DAMAGE REPORT =====")
+
+                for booking in report:
+                    print("-" * 40)
+                    print(booking["booking_id"])
+
+            elif choice == "28":
+                report = missing_inventory_report()
+
+                print(
+                    "\n===== MISSING INVENTORY ====="
+                )
+
+                for booking in report:
+                    print("-" * 40)
+                    print(booking["booking_id"])
+
+            elif choice == "29":
+                report = inventory_utilization_report()
+
+                print(
+                    "\n===== INVENTORY UTILIZATION ====="
+                )
+
+                print(
+                    f"Most Rented: "
+                    f"{report.get('most_rented', 'N/A')}"
+                )
+
+                print(
+                    f"Least Rented: "
+                    f"{report.get('least_rented', 'N/A')}"
+                )
+
+            elif choice == "30":
+                report = returned_booking_report()
+
+                print(
+                    "\n===== RETURNED BOOKINGS ====="
+                )
+
+                print(
+                    f"Returned Count: "
+                    f"{report['total_returned']}"
+                )
+
+                print(
+                    f"Settlement Total: "
+                    f"{report['total_settlement']}"
+                )
+
+            elif choice == "31":
                 print("\nExiting Inventory Menu...")
                 break
 
@@ -589,4 +769,3 @@ def inventory_menu():
         except Exception as e:
             print(f"\nAn error occurred: {e}")
             continue
-
