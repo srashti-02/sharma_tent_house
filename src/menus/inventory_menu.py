@@ -5,6 +5,18 @@ search_item,
 update_quantity,
 update_item_status
 )
+from services.operations_service import (
+    get_todays_deliveries,
+    get_todays_collections,
+    get_active_bookings,
+    get_rented_inventory
+)
+from services.customer_service import (
+    add_customer,
+    get_all_customers,
+    search_customer,
+    get_customer_history
+)
 from services.booking_service import (
     create_booking,
     get_all_bookings
@@ -12,6 +24,11 @@ from services.booking_service import (
 
 from services.availability_service import (
     check_bulk_availability
+)
+from services.payment_service import (
+    apply_discount,
+    record_deposit,
+    get_payment_summary
 )
 
 def show_inventory_summary():
@@ -52,10 +69,22 @@ def inventory_menu():
         print("4. Update Quantity")
         print("5. Mark Item Inactive")
         print("6. Inventory Summary")
-        print("7. Create Booking")
-        print("8. Check Availability")
-        print("9. View Bookings")
-        print("10. Exit")
+        print("7. Add Customer")
+        print("8. Search Customer")
+        print("9. View Customers")
+        print("10. Create Booking")
+        print("11. Check Availability")
+        print("12. View Bookings")
+        print("13. View Customer History")
+        print("14. Apply Discount")
+        print("15. Record Deposit")
+        print("16. Payment Summary")
+        print("17. Today's Deliveries")
+        print("18. Today's Collections")
+        print("19. Active Bookings")
+        print("20. Currently Rented Inventory")
+        print("21. Exit")
+    
 
         choice = input("\nEnter choice: ")
 
@@ -68,127 +97,496 @@ def inventory_menu():
                 damage = float(input("Damage Charge: "))
                 item_type = input("Item Type (bulk/limited/unique): ")
 
-                item = add_item(item_name, category, quantity, rent, damage, item_type)
-                print(f"\nItem Added Successfully with ID {item['item_id']}")
+                item = add_item(
+                    item_name,
+                    category,
+                    quantity,
+                    rent,
+                    damage,
+                    item_type
+                )
+
+                print(
+                    f"\nItem Added Successfully with ID "
+                    f"{item['item_id']}"
+                )
 
             elif choice == "2":
                 items = get_all_items()
+
                 if not items:
                     print("\nNo active inventory items found.")
                     continue
+
                 print("\n===== INVENTORY =====")
+
                 for item in items:
                     print("-" * 40)
                     print(f"ID: {item['item_id']}")
                     print(f"Name: {item['item_name']}")
                     print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
-                    print(f"Rent/Day: Rs.{item['standard_rent_per_day']}")
-                    print(f"Damage Charge: Rs.{item['damage_charge']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
                     print(f"Type: {item['item_type']}")
                     print(f"Status: {item['item_status']}")
 
             elif choice == "3":
                 name = input("Enter item name to search: ")
+
                 results = search_item(name)
+
                 if not results:
                     print("\nNo item found.")
                     continue
+
                 print("\n===== SEARCH RESULTS =====")
+
                 for index, item in enumerate(results, start=1):
                     print("-" * 40)
                     print(f"{index}. {item['item_name']}")
                     print(f"ID: {item['item_id']}")
                     print(f"Category: {item['category']}")
                     print(f"Quantity: {item['total_quantity']}")
-                    print(f"Rent/Day: Rs.{item['standard_rent_per_day']}")
-                    print(f"Damage Charge: Rs.{item['damage_charge']}")
+                    print(
+                        f"Rent/Day: Rs.{item['standard_rent_per_day']}"
+                    )
+                    print(
+                        f"Damage Charge: Rs.{item['damage_charge']}"
+                    )
                     print(f"Type: {item['item_type']}")
                     print(f"Status: {item['item_status']}")
 
-                selection = int(input("\nSelect item number (0 to go back): "))
+                selection = int(
+                    input("\nSelect item number (0 to go back): ")
+                )
+
                 if selection == 0:
                     continue
+
                 if selection < 1 or selection > len(results):
                     print("\nInvalid selection.")
                     continue
 
                 selected_item = results[selection - 1]
+
                 print("\nActions")
                 print("1. Update Quantity")
                 print("2. Mark Item Inactive")
                 print("3. Back")
 
                 action = input("\nChoose action: ")
+
                 if action == "1":
                     quantity = int(input("New Quantity: "))
-                    update_quantity(selected_item["item_id"], quantity)
-                    print("\nQuantity Updated Successfully")
+
+                    update_quantity(
+                        selected_item["item_id"],
+                        quantity
+                    )
+
+                    print(
+                        "\nQuantity Updated Successfully"
+                    )
+
                 elif action == "2":
-                    update_item_status(selected_item["item_id"], "inactive")
-                    print("\nItem marked as inactive successfully")
+                    update_item_status(
+                        selected_item["item_id"],
+                        "inactive"
+                    )
+
+                    print(
+                        "\nItem marked as inactive successfully"
+                    )
 
             elif choice == "4":
                 item_id = input("Enter Item ID: ")
                 quantity = int(input("New Quantity: "))
+
                 update_quantity(item_id, quantity)
+
                 print("\nQuantity Updated Successfully")
 
             elif choice == "5":
                 item_id = input("Enter Item ID: ")
-                update_item_status(item_id, "inactive")
-                print("\nItem marked as inactive successfully")
+
+                update_item_status(
+                    item_id,
+                    "inactive"
+                )
+
+                print(
+                    "\nItem marked as inactive successfully"
+                )
 
             elif choice == "6":
                 show_inventory_summary()
 
             elif choice == "7":
-                item_id = input("Item ID: ")
-                quantity = int(input("Quantity: "))
-                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
-                return_date = input("Return Date (YYYY-MM-DD): ")
+                customer_name = input("Customer Name: ")
+                phone = input("Phone: ")
+                address = input("Address: ")
 
-                booking = create_booking(item_id, quantity, delivery_date, return_date)
+                customer = add_customer(
+                    customer_name,
+                    phone,
+                    address
+                )
 
-                print(f"\nBooking Created: {booking['booking_id']}")
+                print(
+                    f"\nCustomer Added Successfully "
+                    f"with ID {customer['customer_id']}"
+                )
 
             elif choice == "8":
+                name = input(
+                    "Enter customer name: "
+                )
+
+                customers = search_customer(name)
+
+                if not customers:
+                    print("\nNo customer found.")
+                    continue
+
+                print("\n===== CUSTOMERS =====")
+
+                for customer in customers:
+                    print("-" * 40)
+                    print(
+                        f"ID: {customer['customer_id']}"
+                    )
+                    print(
+                        f"Name: {customer['customer_name']}"
+                    )
+                    print(
+                        f"Phone: {customer['phone']}"
+                    )
+                    print(
+                        f"Address: {customer['address']}"
+                    )
+
+            elif choice == "9":
+                customers = get_all_customers()
+
+                if not customers:
+                    print("\nNo customers found.")
+                    continue
+
+                print("\n===== ALL CUSTOMERS =====")
+
+                for customer in customers:
+                    print("-" * 40)
+                    print(
+                        f"ID: {customer['customer_id']}"
+                    )
+                    print(
+                        f"Name: {customer['customer_name']}"
+                    )
+                    print(
+                        f"Phone: {customer['phone']}"
+                    )
+                    print(
+                        f"Address: {customer['address']}"
+                    )
+
+            elif choice == "10":
+                customer_id = input("Customer ID: ")
                 item_id = input("Item ID: ")
                 quantity = int(input("Quantity: "))
-                delivery_date = input("Delivery Date (YYYY-MM-DD): ")
-                return_date = input("Return Date (YYYY-MM-DD): ")
 
-                result = check_bulk_availability(item_id, quantity, delivery_date, return_date)
+                delivery_date = input(
+                    "Delivery Date (YYYY-MM-DD): "
+                )
+
+                return_date = input(
+                    "Return Date (YYYY-MM-DD): "
+                )
+
+                booking = create_booking(
+                    customer_id,
+                    item_id,
+                    quantity,
+                    delivery_date,
+                    return_date
+                )
+
+                print(
+                    f"\nBooking Created: "
+                    f"{booking['booking_id']}"
+                )
+
+            elif choice == "11":
+                item_id = input("Item ID: ")
+                quantity = int(input("Quantity: "))
+
+                delivery_date = input(
+                    "Delivery Date (YYYY-MM-DD): "
+                )
+
+                return_date = input(
+                    "Return Date (YYYY-MM-DD): "
+                )
+
+                result = check_bulk_availability(
+                    item_id,
+                    quantity,
+                    delivery_date,
+                    return_date
+                )
 
                 print("\n===== AVAILABILITY =====")
-                print(f"Available Quantity: {result['available_quantity']}")
+                print(
+                    f"Available Quantity: "
+                    f"{result['available_quantity']}"
+                )
+
                 if result.get("available"):
                     print("Status: AVAILABLE")
                 else:
                     print("Status: NOT AVAILABLE")
 
-            elif choice == "9":
+            elif choice == "12":
                 bookings = get_all_bookings()
+
                 if not bookings:
                     print("\nNo bookings found.")
                     continue
 
                 print("\n===== BOOKINGS =====")
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(
+                        f"Booking ID: "
+                        f"{booking['booking_id']}"
+                    )
+                    print(
+                        f"Customer ID: "
+                        f"{booking.get('customer_id', 'N/A')}"
+                    )
+                    print(
+                        f"Item ID: "
+                        f"{booking['item_id']}"
+                    )
+                    print(
+                        f"Status: "
+                        f"{booking.get('booking_status', 'active')}"
+                    )
+                    print(
+                        f"Quantity: "
+                        f"{booking['quantity']}"
+                    )
+                    print(
+                        f"Delivery: "
+                        f"{booking['delivery_date']}"
+                    )
+                    print(
+                        f"Return: "
+                        f"{booking['return_date']}"
+                    )
+
+            elif choice == "13":
+                customer_id = input(
+                    "Customer ID: "
+                )
+
+                bookings = get_customer_history(
+                    customer_id
+                )
+
+                if not bookings:
+                    print(
+                        "\nNo bookings found for customer."
+                    )
+                    continue
+
+                print(
+                    "\n===== CUSTOMER HISTORY ====="
+                )
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(
+                        f"Booking ID: "
+                        f"{booking['booking_id']}"
+                    )
+                    print(
+                        f"Item ID: "
+                        f"{booking['item_id']}"
+                    )
+                    print(
+                        f"Quantity: "
+                        f"{booking['quantity']}"
+                    )
+                    print(
+                        f"Delivery: "
+                        f"{booking['delivery_date']}"
+                    )
+                    print(
+                        f"Return: "
+                        f"{booking['return_date']}"
+                    )
+
+            elif choice == "14":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                discount = float(
+                    input("Discount Amount: ")
+                )
+
+                booking = apply_discount(
+                    booking_id,
+                    discount
+                )
+
+                print(
+                    "\nDiscount Applied Successfully"
+                )
+
+                print(
+                    f"Final Total: "
+                    f"{booking['final_total']}"
+                )
+
+            elif choice == "15":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                amount = float(
+                    input("Deposit Amount: ")
+                )
+
+                booking = record_deposit(
+                    booking_id,
+                    amount
+                )
+
+                print(
+                    "\nDeposit Recorded Successfully"
+                )
+
+                print(
+                    f"Balance Due: "
+                    f"{booking['balance_due']}"
+                )
+
+            elif choice == "16":
+                booking_id = input(
+                    "Booking ID: "
+                )
+
+                booking = get_payment_summary(
+                    booking_id
+                )
+
+                print("\n===== PAYMENT SUMMARY =====")
+
+                print(
+                    f"Booking ID: "
+                    f"{booking['booking_id']}"
+                )
+
+                print(
+                    f"Standard Total: "
+                    f"{booking.get('standard_total', 0)}"
+                )
+
+                print(
+                    f"Discount: "
+                    f"{booking.get('discount', 0)}"
+                )
+
+                print(
+                    f"Final Total: "
+                    f"{booking.get('final_total', 0)}"
+                )
+
+                print(
+                    f"Deposit Paid: "
+                    f"{booking.get('deposit_paid', 0)}"
+                )
+
+                print(
+                    f"Balance Due: "
+                    f"{booking.get('balance_due', 0)}"
+                )
+
+                print(
+                    f"Payment Status: "
+                    f"{booking.get('payment_status', 'pending')}"
+                )
+            elif choice == "17":
+                bookings = get_todays_deliveries()
+
+                print("\n===== TODAY'S DELIVERIES =====")
+
+                if not bookings:
+                    print("No deliveries today.")
+                    continue
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking: {booking['booking_id']}")
+                    print(f"Customer: {booking.get('customer_id', 'N/A')}")
+
+            elif choice == "18":
+                bookings = get_todays_collections()
+
+                print("\n===== TODAY'S COLLECTIONS =====")
+
+                if not bookings:
+                    print("No collections today.")
+                    continue
+
+                for booking in bookings:
+                    print("-" * 40)
+                    print(f"Booking: {booking['booking_id']}")
+                    print(f"Customer: {booking.get('customer_id', 'N/A')}")
+
+            elif choice == "19":
+                bookings = get_active_bookings()
+
+                print("\n===== ACTIVE BOOKINGS =====")
+
+                if not bookings:
+                    print("No active bookings found.")
+                    continue
+
                 for booking in bookings:
                     print("-" * 40)
                     print(f"Booking ID: {booking['booking_id']}")
-                    print(f"Item ID: {booking['item_id']}")
-                    print(f"Quantity: {booking['quantity']}")
-                    print(f"Delivery: {booking['delivery_date']}")
-                    print(f"Return: {booking['return_date']}")
+                    print(f"Customer ID: {booking.get('customer_id', 'N/A')}")
+                    print(f"Item ID: {booking.get('item_id', 'N/A')}")
 
-            elif choice == "10":
-                print("\nThank you for using Sharma Tent House System.")
+            elif choice == "20":
+                inventory = get_rented_inventory()
+
+                print("\n===== RENTED INVENTORY =====")
+
+                if not inventory:
+                    print("No inventory currently rented.")
+                    continue
+
+                for item_id, quantity in inventory.items():
+                    print(f"{item_id}: {quantity}")
+
+
+
+            elif choice == "21":
+                print("\nExiting Inventory Menu...")
                 break
 
             else:
-                print("\nInvalid option.")
-
-        except ValueError as error:
-            print(f"\nError: {error}")
+                print("\nInvalid choice. Please try again.")
+        except Exception as e:
+            print(f"\nAn error occurred: {e}")
+            continue
 

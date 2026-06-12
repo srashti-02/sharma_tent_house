@@ -1,0 +1,82 @@
+from storage.json_storage import (
+    load_bookings,
+    save_bookings
+)
+
+
+def record_deposit(
+    booking_id,
+    amount
+):
+    bookings = load_bookings()
+
+    for booking in bookings:
+
+        if booking["booking_id"] == booking_id:
+
+            booking["deposit_paid"] += amount
+
+            booking["balance_due"] = (
+                booking["final_total"]
+                - booking["deposit_paid"]
+            )
+
+            if booking["balance_due"] <= 0:
+                booking["payment_status"] = "paid"
+
+            elif booking["deposit_paid"] > 0:
+                booking["payment_status"] = "partial"
+
+            save_bookings(bookings)
+
+            return booking
+
+    raise ValueError(
+        "Booking not found."
+    )
+
+
+def apply_discount(
+    booking_id,
+    discount_amount
+):
+    bookings = load_bookings()
+
+    for booking in bookings:
+
+        if booking["booking_id"] == booking_id:
+
+            booking["discount"] = discount_amount
+
+            booking["final_total"] = (
+                booking["standard_total"]
+                - discount_amount
+            )
+
+            booking["balance_due"] = (
+                booking["final_total"]
+                - booking["deposit_paid"]
+            )
+
+            save_bookings(bookings)
+
+            return booking
+
+    raise ValueError(
+        "Booking not found."
+    )
+
+
+def get_payment_summary(
+    booking_id
+):
+    bookings = load_bookings()
+
+    for booking in bookings:
+
+        if booking["booking_id"] == booking_id:
+            return booking
+
+    raise ValueError(
+        "Booking not found."
+    )
