@@ -90,8 +90,6 @@ def create_booking(
         "discount": 0,
         "final_total": standard_total,
         "deposit_paid": 0,
-        "balance_due": standard_total,
-        "payment_status": "pending"
     }
 
     bookings.append(booking)

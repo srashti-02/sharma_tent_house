@@ -1,3 +1,5 @@
+from decimal import Decimal
+from datetime import datetime
 from services.inventory_service import (
 add_item,
 get_all_items,
@@ -14,7 +16,9 @@ from services.operations_service import (
 from services.customer_service import (
     add_customer,
     get_all_customers,
-    search_customer,
+    search_customer
+)
+from services.customer_history_service import (
     get_customer_history
 )
 from services.booking_service import (
@@ -26,9 +30,10 @@ from services.availability_service import (
     check_bulk_availability
 )
 from services.payment_service import (
-    apply_discount,
+    set_discount,
     record_deposit,
-    get_payment_summary
+    get_payment_summary,
+    
 )
 from services.return_service import (
     process_return,
@@ -45,6 +50,24 @@ from services.report_service import (
     inventory_utilization_report,
     returned_booking_report
 )
+
+def get_valid_date(prompt):
+    while True:
+        date_value = input(prompt).strip()
+
+        try:
+            datetime.strptime(
+                date_value,
+                "%Y-%m-%d"
+            )
+            return date_value
+
+        except ValueError:
+            print(
+                "Invalid date format. "
+                "Use YYYY-MM-DD"
+            )
+
 
 def show_inventory_summary():
     items = get_all_items(include_inactive=True)
@@ -118,8 +141,8 @@ def inventory_menu():
                 item_name = input("Item Name: ")
                 category = input("Category: ")
                 quantity = int(input("Quantity: "))
-                rent = float(input("Rent Per Day: "))
-                damage = float(input("Damage Charge: "))
+                rent = Decimal(input("Rent Per Day: "))
+                damage = Decimal(input("Damage Charge: "))
                 item_type = input("Item Type (bulk/limited/unique): ")
 
                 item = add_item(
@@ -324,13 +347,13 @@ def inventory_menu():
                 item_id = input("Item ID: ")
                 quantity = int(input("Quantity: "))
 
-                delivery_date = input(
+                delivery_date = get_valid_date(
                     "Delivery Date (YYYY-MM-DD): "
-                )
+               )
 
-                return_date = input(
-                    "Return Date (YYYY-MM-DD): "
-                )
+                return_date = get_valid_date(
+                       "Return Date (YYYY-MM-DD): "
+               )
 
                 booking = create_booking(
                     customer_id,
@@ -462,11 +485,11 @@ def inventory_menu():
                     "Booking ID: "
                 )
 
-                discount = float(
+                discount = Decimal(
                     input("Discount Amount: ")
                 )
 
-                booking = apply_discount(
+                booking = set_discount(
                     booking_id,
                     discount
                 )
@@ -498,9 +521,14 @@ def inventory_menu():
                     "\nDeposit Recorded Successfully"
                 )
 
+                balance_due = (
+                     booking["final_total"]
+                     - booking["deposit_paid"]
+                )
+
                 print(
                     f"Balance Due: "
-                    f"{booking['balance_due']}"
+                    f"{balance_due}"
                 )
 
             elif choice == "16":
@@ -539,15 +567,34 @@ def inventory_menu():
                     f"{booking.get('deposit_paid', 0)}"
                 )
 
+                balance_due = (
+                    booking["final_total"]
+                   - booking["deposit_paid"]
+  )
+
                 print(
-                    f"Balance Due: "
-                    f"{booking.get('balance_due', 0)}"
+                     f"Balance Due: "
+                     f"{balance_due}"
                 )
+
+                balance_due = (
+                          booking["final_total"]
+                          - booking["deposit_paid"]
+              )
+
+                if balance_due <= 0:
+                  payment_status = "paid"
+
+                elif booking["deposit_paid"] > 0:
+                   payment_status = "partial"
+
+                else:
+                   payment_status = "pending"
 
                 print(
                     f"Payment Status: "
-                    f"{booking.get('payment_status', 'pending')}"
-                )
+                    f"{payment_status}"
+               )
             elif choice == "17":
                 bookings = get_todays_deliveries()
 

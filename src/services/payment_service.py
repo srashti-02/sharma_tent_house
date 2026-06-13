@@ -16,17 +16,6 @@ def record_deposit(
 
             booking["deposit_paid"] += amount
 
-            booking["balance_due"] = (
-                booking["final_total"]
-                - booking["deposit_paid"]
-            )
-
-            if booking["balance_due"] <= 0:
-                booking["payment_status"] = "paid"
-
-            elif booking["deposit_paid"] > 0:
-                booking["payment_status"] = "partial"
-
             save_bookings(bookings)
 
             return booking
@@ -36,7 +25,7 @@ def record_deposit(
     )
 
 
-def apply_discount(
+def set_discount(
     booking_id,
     discount_amount
 ):
@@ -51,11 +40,6 @@ def apply_discount(
             booking["final_total"] = (
                 booking["standard_total"]
                 - discount_amount
-            )
-
-            booking["balance_due"] = (
-                booking["final_total"]
-                - booking["deposit_paid"]
             )
 
             save_bookings(bookings)
@@ -75,7 +59,27 @@ def get_payment_summary(
     for booking in bookings:
 
         if booking["booking_id"] == booking_id:
-            return booking
+
+            balance_due = (
+                booking["final_total"]
+                - booking["deposit_paid"]
+            )
+
+            if balance_due <= 0:
+                payment_status = "paid"
+
+            elif booking["deposit_paid"] > 0:
+                payment_status = "partial"
+
+            else:
+                payment_status = "pending"
+
+            summary = booking.copy()
+
+            summary["balance_due"] = balance_due
+            summary["payment_status"] = payment_status
+
+            return summary
 
     raise ValueError(
         "Booking not found."

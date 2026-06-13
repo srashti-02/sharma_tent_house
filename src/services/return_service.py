@@ -5,6 +5,7 @@ from storage.json_storage import (
     save_bookings
 )
 
+
 def process_return(
     booking_id,
     actual_return_date
@@ -154,9 +155,10 @@ def calculate_settlement(
 
         if booking["booking_id"] == booking_id:
 
-            balance_due = booking.get(
-                "balance_due",
-                0
+            # Derived value (not stored)
+            balance_due = (
+                booking["final_total"]
+                - booking["deposit_paid"]
             )
 
             damage_fee = booking.get(

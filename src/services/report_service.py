@@ -18,9 +18,10 @@ def revenue_report():
     )
 
     total_balance = sum(
-        booking.get("balance_due", 0)
-        for booking in bookings
-    )
+    booking["final_total"]
+    - booking["deposit_paid"]
+    for booking in bookings
+)
 
     return {
         "total_revenue": total_revenue,
