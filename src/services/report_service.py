@@ -1,6 +1,5 @@
 from storage.json_storage import (
-    load_bookings,
-    load_inventory
+    load_bookings
 )
 
 
@@ -8,20 +7,32 @@ def revenue_report():
     bookings = load_bookings()
 
     total_revenue = sum(
-        booking.get("final_total", 0)
+        booking.get(
+            "final_total",
+            0
+        )
         for booking in bookings
     )
 
     total_deposits = sum(
-        booking.get("deposit_paid", 0)
+        booking.get(
+            "deposit_paid",
+            0
+        )
         for booking in bookings
     )
 
     total_balance = sum(
-    booking["final_total"]
-    - booking["deposit_paid"]
-    for booking in bookings
-)
+        booking.get(
+            "final_total",
+            0
+        )
+        - booking.get(
+            "deposit_paid",
+            0
+        )
+        for booking in bookings
+    )
 
     return {
         "total_revenue": total_revenue,
@@ -36,7 +47,10 @@ def damage_report():
     return [
         booking
         for booking in bookings
-        if booking.get("damage_fee", 0) > 0
+        if booking.get(
+            "damage_fee",
+            0
+        ) > 0
     ]
 
 
@@ -46,7 +60,10 @@ def missing_inventory_report():
     return [
         booking
         for booking in bookings
-        if booking.get("replacement_fee", 0) > 0
+        if booking.get(
+            "replacement_fee",
+            0
+        ) > 0
     ]
 
 
@@ -56,8 +73,9 @@ def returned_booking_report():
     returned = [
         booking
         for booking in bookings
-        if booking.get("booking_status")
-        == "returned"
+        if booking.get(
+            "booking_status"
+        ) == "returned"
     ]
 
     total_settlement = sum(
@@ -79,13 +97,28 @@ def inventory_utilization_report():
 
     rented = {}
 
-    for booking in bookings:
+    active_bookings = [
+        booking
+        for booking in bookings
+        if booking.get(
+            "booking_status",
+            "active"
+        ) == "active"
+    ]
+
+    for booking in active_bookings:
 
         item_id = booking["item_id"]
 
         rented[item_id] = (
-            rented.get(item_id, 0)
-            + booking["quantity"]
+            rented.get(
+                item_id,
+                0
+            )
+            + booking.get(
+                "quantity",
+                0
+            )
         )
 
     if not rented:
@@ -103,5 +136,6 @@ def inventory_utilization_report():
 
     return {
         "most_rented": most_rented,
-        "least_rented": least_rented
+        "least_rented": least_rented,
+        "rented_quantities": rented
     }
