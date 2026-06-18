@@ -38,11 +38,32 @@ def record_damage(
     damaged_quantity,
     damage_fee
 ):
+    if damaged_quantity <= 0:
+        raise ValueError(
+            "Damaged quantity must be greater than zero."
+        )
+
+    if damage_fee < 0:
+        raise ValueError(
+            "Damage fee cannot be negative."
+        )
+
     bookings = load_bookings()
 
     for booking in bookings:
 
         if booking["booking_id"] == booking_id:
+
+            if (
+                booking.get(
+                    "booking_status",
+                    "active"
+                )
+                != "returned"
+            ):
+                raise ValueError(
+                    "Booking must be returned before recording damage."
+                )
 
             booking["damaged_quantity"] = (
                 damaged_quantity
@@ -66,11 +87,32 @@ def record_missing_items(
     missing_quantity,
     replacement_fee
 ):
+    if missing_quantity <= 0:
+        raise ValueError(
+            "Missing quantity must be greater than zero."
+        )
+
+    if replacement_fee < 0:
+        raise ValueError(
+            "Replacement fee cannot be negative."
+        )
+
     bookings = load_bookings()
 
     for booking in bookings:
 
         if booking["booking_id"] == booking_id:
+
+            if (
+                booking.get(
+                    "booking_status",
+                    "active"
+                )
+                != "returned"
+            ):
+                raise ValueError(
+                    "Booking must be returned before recording missing items."
+                )
 
             booking["missing_quantity"] = (
                 missing_quantity
@@ -155,10 +197,15 @@ def calculate_settlement(
 
         if booking["booking_id"] == booking_id:
 
-            # Derived value (not stored)
             balance_due = (
-                booking["final_total"]
-                - booking["deposit_paid"]
+                booking.get(
+                    "final_total",
+                    0
+                )
+                - booking.get(
+                    "deposit_paid",
+                    0
+                )
             )
 
             damage_fee = booking.get(
