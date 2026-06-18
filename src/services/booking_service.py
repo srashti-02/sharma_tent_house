@@ -11,6 +11,10 @@ from services.inventory_service import (
     get_all_items
 )
 
+from services.customer_service import (
+    customer_exists
+)
+
 
 def generate_booking_id():
     bookings = load_bookings()
@@ -47,6 +51,13 @@ def create_booking(
     delivery_date,
     return_date
 ):
+    # Review Fix:
+    # Validate customer exists
+    if not customer_exists(customer_id):
+        raise ValueError(
+            "Customer not found."
+        )
+
     availability = check_bulk_availability(
         item_id,
         quantity,
@@ -66,13 +77,19 @@ def create_booking(
 
     for item in inventory_items:
         if item["item_id"] == item_id:
-            rent = item["standard_rent_per_day"]
+            rent = item[
+                "standard_rent_per_day"
+            ]
             break
 
     if rent is None:
-        raise ValueError("Item not found.")
+        raise ValueError(
+            "Item not found."
+        )
 
-    standard_total = rent * quantity
+    standard_total = (
+        rent * quantity
+    )
 
     bookings = load_bookings()
 
@@ -85,11 +102,11 @@ def create_booking(
         "return_date": return_date,
         "booking_status": "active",
 
-        # Phase 3C
+        # Payment fields
         "standard_total": standard_total,
         "discount": 0,
         "final_total": standard_total,
-        "deposit_paid": 0,
+        "deposit_paid": 0
     }
 
     bookings.append(booking)
@@ -103,25 +120,52 @@ def get_all_bookings():
     return load_bookings()
 
 
-def get_customer_bookings(customer_id):
+def get_customer_bookings(
+    customer_id
+):
     bookings = load_bookings()
 
     return [
         booking
         for booking in bookings
-        if booking.get("customer_id") == customer_id
+        if booking.get(
+            "customer_id"
+        ) == customer_id
     ]
 
 
-def cancel_booking(booking_id):
+def cancel_booking(
+    booking_id
+):
     bookings = load_bookings()
 
     for booking in bookings:
-        if booking["booking_id"] == booking_id:
-            booking["booking_status"] = "cancelled"
+
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
+            booking[
+                "booking_status"
+            ] = "cancelled"
+
+            refund = booking.get(
+                "deposit_paid",
+                0
+            )
+
+            booking[
+                "refund_amount"
+            ] = refund
+
+            booking[
+                "deposit_paid"
+            ] = 0
 
             save_bookings(bookings)
 
             return booking
 
-    raise ValueError("Booking not found.")
+    raise ValueError(
+        "Booking not found."
+    )

@@ -82,6 +82,14 @@ def search_customer(name):
         in customer["customer_name"].lower()
     ]
 
+def customer_exists(customer_id):
+    customers = load_customers()
+
+    return any(
+        customer["customer_id"] == customer_id
+        for customer in customers
+    )
+
 
 
 
