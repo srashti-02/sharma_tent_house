@@ -8,6 +8,11 @@ def record_deposit(
     booking_id,
     amount
 ):
+    if amount <= 0:
+        raise ValueError(
+            "Deposit amount must be greater than zero."
+        )
+
     bookings = load_bookings()
 
     for booking in bookings:
@@ -29,13 +34,28 @@ def set_discount(
     booking_id,
     discount_amount
 ):
+    if discount_amount < 0:
+        raise ValueError(
+            "Discount cannot be negative."
+        )
+
     bookings = load_bookings()
 
     for booking in bookings:
 
         if booking["booking_id"] == booking_id:
 
-            booking["discount"] = discount_amount
+            if (
+                discount_amount
+                > booking["standard_total"]
+            ):
+                raise ValueError(
+                    "Discount cannot exceed total amount."
+                )
+
+            booking["discount"] = (
+                discount_amount
+            )
 
             booking["final_total"] = (
                 booking["standard_total"]
@@ -76,8 +96,13 @@ def get_payment_summary(
 
             summary = booking.copy()
 
-            summary["balance_due"] = balance_due
-            summary["payment_status"] = payment_status
+            summary["balance_due"] = (
+                balance_due
+            )
+
+            summary["payment_status"] = (
+                payment_status
+            )
 
             return summary
 
