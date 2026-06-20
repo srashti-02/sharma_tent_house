@@ -19,7 +19,29 @@ def record_deposit(
 
         if booking["booking_id"] == booking_id:
 
-            booking["deposit_paid"] += amount
+            current_deposit = booking.get(
+                "deposit_paid",
+                0
+            )
+
+            final_total = booking.get(
+                "final_total",
+                0
+            )
+
+            new_total = (
+                current_deposit
+                + amount
+            )
+
+            if new_total > final_total:
+                raise ValueError(
+                    "Total deposit cannot exceed final total."
+                )
+
+            booking["deposit_paid"] = (
+                new_total
+            )
 
             save_bookings(bookings)
 

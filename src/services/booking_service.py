@@ -51,8 +51,7 @@ def create_booking(
     delivery_date,
     return_date
 ):
-    # Review Fix:
-    # Validate customer exists
+    # Validate customer first
     if not customer_exists(customer_id):
         raise ValueError(
             "Customer not found."
@@ -101,8 +100,6 @@ def create_booking(
         "delivery_date": delivery_date,
         "return_date": return_date,
         "booking_status": "active",
-
-        # Payment fields
         "standard_total": standard_total,
         "discount": 0,
         "final_total": standard_total,
@@ -110,7 +107,6 @@ def create_booking(
     }
 
     bookings.append(booking)
-
     save_bookings(bookings)
 
     return booking
@@ -140,7 +136,6 @@ def cancel_booking(
     bookings = load_bookings()
 
     for booking in bookings:
-
         if (
             booking["booking_id"]
             == booking_id
@@ -163,7 +158,6 @@ def cancel_booking(
             ] = 0
 
             save_bookings(bookings)
-
             return booking
 
     raise ValueError(

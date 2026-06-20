@@ -1,21 +1,20 @@
 from pathlib import Path
 import json
 
-
 CUSTOMERS_FILE = Path("data/customers.json")
 
 
 def load_customers():
     if not CUSTOMERS_FILE.exists():
-        CUSTOMERS_FILE.parent.mkdir(exist_ok=True)
-        CUSTOMERS_FILE.write_text("[]")
+        CUSTOMERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        CUSTOMERS_FILE.write_text("[]", encoding="utf-8")
 
-    with open(CUSTOMERS_FILE, "r") as file:
+    with open(CUSTOMERS_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
 def save_customers(customers):
-    with open(CUSTOMERS_FILE, "w") as file:
+    with open(CUSTOMERS_FILE, "w", encoding="utf-8") as file:
         json.dump(customers, file, indent=4)
 
 
@@ -30,28 +29,16 @@ def generate_customer_id():
     for customer in customers:
         try:
             number = int(
-                customer["customer_id"].replace(
-                    "CUST_",
-                    ""
-                )
+                customer["customer_id"].replace("CUST_", "")
             )
-
-            max_number = max(
-                max_number,
-                number
-            )
-
-        except Exception:
+            max_number = max(max_number, number)
+        except (KeyError, ValueError):
             continue
 
     return f"CUST_{max_number + 1:03d}"
 
 
-def add_customer(
-    customer_name,
-    phone,
-    address
-):
+def add_customer(customer_name, phone, address):
     customers = load_customers()
 
     customer = {
@@ -62,7 +49,6 @@ def add_customer(
     }
 
     customers.append(customer)
-
     save_customers(customers)
 
     return customer
@@ -78,18 +64,17 @@ def search_customer(name):
     return [
         customer
         for customer in customers
-        if name.lower()
-        in customer["customer_name"].lower()
+        if name.lower() in customer["customer_name"].lower()
     ]
+
 
 def customer_exists(customer_id):
     customers = load_customers()
 
     return any(
-        customer["customer_id"] == customer_id
+        customer.get("customer_id") == customer_id
         for customer in customers
     )
-
 
 
 

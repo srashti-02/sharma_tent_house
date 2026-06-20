@@ -4,5 +4,11 @@
         "customer_name": "Srashti Kumari ",
         "phone": "2255667788",
         "address": "Kota"
+    },
+    {
+        "customer_id": "CUST_002",
+        "customer_name": "Priya",
+        "phone": "9876543210",
+        "address": "Jaipur"
     }
 ]
