@@ -1,21 +1,7 @@
-from pathlib import Path
-import json
-
-CUSTOMERS_FILE = Path("data/customers.json")
-
-
-def load_customers():
-    if not CUSTOMERS_FILE.exists():
-        CUSTOMERS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        CUSTOMERS_FILE.write_text("[]", encoding="utf-8")
-
-    with open(CUSTOMERS_FILE, "r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def save_customers(customers):
-    with open(CUSTOMERS_FILE, "w", encoding="utf-8") as file:
-        json.dump(customers, file, indent=4)
+from storage.json_storage import (
+    load_customers,
+    save_customers
+)
 
 
 def generate_customer_id():
@@ -29,27 +15,55 @@ def generate_customer_id():
     for customer in customers:
         try:
             number = int(
-                customer["customer_id"].replace("CUST_", "")
+                customer[
+                    "customer_id"
+                ].replace(
+                    "CUST_",
+                    ""
+                )
             )
-            max_number = max(max_number, number)
-        except (KeyError, ValueError):
+
+            max_number = max(
+                max_number,
+                number
+            )
+
+        except (
+            KeyError,
+            ValueError
+        ):
             continue
 
-    return f"CUST_{max_number + 1:03d}"
+    return (
+        f"CUST_{max_number + 1:03d}"
+    )
 
 
-def add_customer(customer_name, phone, address):
+def add_customer(
+    customer_name,
+    phone,
+    address
+):
     customers = load_customers()
 
     customer = {
-        "customer_id": generate_customer_id(),
-        "customer_name": customer_name,
-        "phone": phone,
-        "address": address
+        "customer_id":
+            generate_customer_id(),
+        "customer_name":
+            customer_name,
+        "phone":
+            phone,
+        "address":
+            address
     }
 
-    customers.append(customer)
-    save_customers(customers)
+    customers.append(
+        customer
+    )
+
+    save_customers(
+        customers
+    )
 
     return customer
 
@@ -58,23 +72,32 @@ def get_all_customers():
     return load_customers()
 
 
-def search_customer(name):
+def search_customer(
+    name
+):
     customers = load_customers()
 
     return [
         customer
         for customer in customers
-        if name.lower() in customer["customer_name"].lower()
+        if (
+            name.lower()
+            in customer[
+                "customer_name"
+            ].lower()
+        )
     ]
 
 
-def customer_exists(customer_id):
+def customer_exists(
+    customer_id
+):
     customers = load_customers()
 
     return any(
-        customer.get("customer_id") == customer_id
-        for customer in customers
+        customer.get(
+            "customer_id"
+        ) == customer_id
+        for customer
+        in customers
     )
-
-
-

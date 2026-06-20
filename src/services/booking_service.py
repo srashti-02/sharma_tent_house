@@ -136,18 +136,30 @@ def cancel_booking(
     bookings = load_bookings()
 
     for booking in bookings:
+
         if (
             booking["booking_id"]
             == booking_id
         ):
-            booking[
-                "booking_status"
-            ] = "cancelled"
+
+            if (
+                booking.get(
+                    "booking_status"
+                )
+                == "cancelled"
+            ):
+                raise ValueError(
+                    "Booking is already cancelled."
+                )
 
             refund = booking.get(
                 "deposit_paid",
                 0
             )
+
+            booking[
+                "booking_status"
+            ] = "cancelled"
 
             booking[
                 "refund_amount"
@@ -157,7 +169,10 @@ def cancel_booking(
                 "deposit_paid"
             ] = 0
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
+
             return booking
 
     raise ValueError(

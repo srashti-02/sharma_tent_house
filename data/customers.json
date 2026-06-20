@@ -10,5 +10,11 @@
         "customer_name": "Priya",
         "phone": "9876543210",
         "address": "Jaipur"
+    },
+    {
+        "customer_id": "CUST_003",
+        "customer_name": "Rahul",
+        "phone": "9999999990",
+        "address": "Kota"
     }
 ]

@@ -10,9 +10,10 @@
         "standard_total": 500,
         "discount": 0,
         "final_total": 500,
-        "deposit_paid": 200.0,
-        "actual_return_date": "2026-06-22",
-        "settlement_total": 300.0
+        "deposit_paid": 0,
+        "actual_return_date": "026-06-25",
+        "settlement_total": 300.0,
+        "refund_amount": 200.0
     },
     {
         "booking_id": "BOOKING_002",
@@ -26,5 +27,18 @@
         "discount": 0,
         "final_total": 360,
         "deposit_paid": 100.0
+    },
+    {
+        "booking_id": "BOOKING_003",
+        "customer_id": "CUST_001",
+        "item_id": "ITEM_001",
+        "quantity": 10,
+        "delivery_date": "2026-06-21",
+        "return_date": "2026-06-23",
+        "booking_status": "active",
+        "standard_total": 500,
+        "discount": 0,
+        "final_total": 500,
+        "deposit_paid": 0
     }
 ]

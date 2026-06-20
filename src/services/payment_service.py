@@ -100,21 +100,21 @@ def get_payment_summary(
 
     for booking in bookings:
 
-        if booking["booking_id"] == booking_id:
-
+        if booking.get("booking_status") == "cancelled":
+              payment_status = "cancelled"
+              balance_due = 0
+        else:
             balance_due = (
-                booking["final_total"]
-                - booking["deposit_paid"]
-            )
+            booking["final_total"]
+            - booking["deposit_paid"]
+    )
 
-            if balance_due <= 0:
-                payment_status = "paid"
-
-            elif booking["deposit_paid"] > 0:
-                payment_status = "partial"
-
-            else:
-                payment_status = "pending"
+        if balance_due <= 0:
+           payment_status = "paid"
+        elif booking["deposit_paid"] > 0:
+            payment_status = "partial"
+        else:
+            payment_status = "pending"
 
             summary = booking.copy()
 
