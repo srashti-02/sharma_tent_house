@@ -16,7 +16,17 @@ def validate_item_id(item_id):
     if not item_id.strip():
         raise ValueError("Item ID cannot be empty.")
 
+def validate_phone(phone):
+    phone = phone.strip()
 
+    if (
+        not phone.isdigit()
+        or len(phone) != 10
+    ):
+        raise ValueError(
+            "Phone number must contain exactly 10 digits."
+        )
+    
 def validate_category(category):
     if not category.strip():
         raise ValueError("Category cannot be empty.")

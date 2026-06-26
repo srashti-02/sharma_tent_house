@@ -34,8 +34,7 @@ def dates_overlap(
 
     return not (
         existing_end < requested_start
-        or
-        existing_start > requested_end
+        or existing_start > requested_end
     )
 
 
@@ -60,6 +59,12 @@ def calculate_booked_quantity(
 
     for booking in bookings:
 
+        if booking.get(
+            "booking_status",
+            "active"
+        ) != "active":
+            continue
+
         if booking["item_id"] != item_id:
             continue
 
@@ -69,7 +74,9 @@ def calculate_booked_quantity(
             delivery_date,
             return_date
         ):
-            booked_quantity += booking["quantity"]
+            booked_quantity += (
+                booking["quantity"]
+            )
 
     return booked_quantity
 
@@ -83,21 +90,32 @@ def check_bulk_availability(
     item = get_item_by_id(item_id)
 
     if not item:
-        raise ValueError("Item not found.")
+        raise ValueError(
+            "Item not found."
+        )
 
-    total_quantity = item["total_quantity"]
+    total_quantity = item[
+        "total_quantity"
+    ]
 
-    booked_quantity = calculate_booked_quantity(
-        item_id,
-        delivery_date,
-        return_date
+    booked_quantity = (
+        calculate_booked_quantity(
+            item_id,
+            delivery_date,
+            return_date
+        )
     )
 
     available_quantity = (
-        total_quantity - booked_quantity
+        total_quantity
+        - booked_quantity
     )
 
     return {
-        "available": available_quantity >= quantity,
-        "available_quantity": available_quantity
+        "available":
+            available_quantity
+            >= quantity,
+
+        "available_quantity":
+            available_quantity
     }

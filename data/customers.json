@@ -1,0 +1,26 @@
+[
+    {
+        "customer_id": "CUST_001",
+        "customer_name": "Priya",
+        "phone": "9988776655",
+        "address": "Kota"
+    },
+    {
+        "customer_id": "CUST_002",
+        "customer_name": "Rahul Sharma",
+        "phone": "9876543210",
+        "address": "Jaipur"
+    },
+    {
+        "customer_id": "CUST_003",
+        "customer_name": "rahul",
+        "phone": "9022537455",
+        "address": "Delhi"
+    },
+    {
+        "customer_id": "CUST_004",
+        "customer_name": "Shri",
+        "phone": "6429703784",
+        "address": "Bundi"
+    }
+]
