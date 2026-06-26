@@ -8,23 +8,31 @@ from storage.json_storage import (
 
 def process_return(
     booking_id,
-    actual_return_date
+    actual_return_date,
+    actual_return_time
 ):
     bookings = load_bookings()
 
     for booking in bookings:
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
+            booking[
+                "actual_return_date"
+            ] = actual_return_date
 
-        if booking["booking_id"] == booking_id:
+            booking[
+                "actual_return_time"
+            ] = actual_return_time
 
-            booking["actual_return_date"] = (
-                actual_return_date
+            booking[
+                "booking_status"
+            ] = "returned"
+
+            save_bookings(
+                bookings
             )
-
-            booking["booking_status"] = (
-                "returned"
-            )
-
-            save_bookings(bookings)
 
             return booking
 
@@ -51,29 +59,31 @@ def record_damage(
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
             if (
                 booking.get(
-                    "booking_status",
-                    "active"
+                    "booking_status"
                 )
                 != "returned"
             ):
                 raise ValueError(
-                    "Booking must be returned before recording damage."
+                    "Booking must be returned first."
                 )
 
-            booking["damaged_quantity"] = (
-                damaged_quantity
-            )
+            booking[
+                "damaged_quantity"
+            ] = damaged_quantity
 
-            booking["damage_fee"] = (
-                damage_fee
-            )
+            booking[
+                "damage_fee"
+            ] = damage_fee
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
 
             return booking
 
@@ -100,29 +110,31 @@ def record_missing_items(
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
             if (
                 booking.get(
-                    "booking_status",
-                    "active"
+                    "booking_status"
                 )
                 != "returned"
             ):
                 raise ValueError(
-                    "Booking must be returned before recording missing items."
+                    "Booking must be returned first."
                 )
 
-            booking["missing_quantity"] = (
-                missing_quantity
-            )
+            booking[
+                "missing_quantity"
+            ] = missing_quantity
 
-            booking["replacement_fee"] = (
-                replacement_fee
-            )
+            booking[
+                "replacement_fee"
+            ] = replacement_fee
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
 
             return booking
 
@@ -133,53 +145,76 @@ def record_missing_items(
 
 def calculate_late_fee(
     booking_id,
-    daily_late_fee=100
+    hourly_late_fee=50
 ):
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
-            actual_return = booking.get(
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
+            actual_date = booking.get(
                 "actual_return_date"
             )
 
-            if not actual_return:
+            actual_time = booking.get(
+                "actual_return_time"
+            )
+
+            if (
+                not actual_date
+                or not actual_time
+            ):
                 raise ValueError(
                     "Booking not returned yet."
                 )
 
-            expected_date = datetime.strptime(
-                booking["return_date"],
-                "%Y-%m-%d"
+            expected_datetime = (
+                datetime.strptime(
+                    f"{booking['return_date']} "
+                    f"{booking['return_time']}",
+                    "%Y-%m-%d %H:%M"
+                )
             )
 
-            actual_date = datetime.strptime(
-                actual_return,
-                "%Y-%m-%d"
+            actual_datetime = (
+                datetime.strptime(
+                    f"{actual_date} "
+                    f"{actual_time}",
+                    "%Y-%m-%d %H:%M"
+                )
             )
 
-            late_days = (
-                actual_date - expected_date
-            ).days
+            difference = (
+                actual_datetime
+                - expected_datetime
+            )
 
-            if late_days < 0:
-                late_days = 0
+            late_hours = int(
+                difference.total_seconds()
+                // 3600
+            )
+
+            if late_hours < 0:
+                late_hours = 0
 
             late_fee = (
-                late_days * daily_late_fee
+                late_hours
+                * hourly_late_fee
             )
 
-            booking["late_days"] = (
-                late_days
-            )
+            booking[
+                "late_hours"
+            ] = late_hours
 
-            booking["late_fee"] = (
-                late_fee
-            )
+            booking[
+                "late_fee"
+            ] = late_fee
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
 
             return booking
 
@@ -194,47 +229,52 @@ def calculate_settlement(
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
-            balance_due = (
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
+            pending_amount = (
                 booking.get(
-                    "final_total",
-                    0
-                )
-                - booking.get(
-                    "deposit_paid",
+                    "pending_amount",
                     0
                 )
             )
 
-            damage_fee = booking.get(
-                "damage_fee",
-                0
+            damage_fee = (
+                booking.get(
+                    "damage_fee",
+                    0
+                )
             )
 
-            replacement_fee = booking.get(
-                "replacement_fee",
-                0
+            replacement_fee = (
+                booking.get(
+                    "replacement_fee",
+                    0
+                )
             )
 
-            late_fee = booking.get(
-                "late_fee",
-                0
+            late_fee = (
+                booking.get(
+                    "late_fee",
+                    0
+                )
             )
 
             settlement_total = (
-                balance_due
+                pending_amount
                 + damage_fee
                 + replacement_fee
                 + late_fee
             )
 
-            booking["settlement_total"] = (
-                settlement_total
-            )
+            booking[
+                "settlement_total"
+            ] = settlement_total
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
 
             return booking
 

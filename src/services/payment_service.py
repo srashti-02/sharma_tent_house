@@ -16,9 +16,10 @@ def record_deposit(
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
             current_deposit = booking.get(
                 "deposit_paid",
                 0
@@ -34,16 +35,28 @@ def record_deposit(
                 + amount
             )
 
-            if new_total > final_total:
+            if (
+                new_total
+                > final_total
+            ):
                 raise ValueError(
-                    "Total deposit cannot exceed final total."
+                    "Total payment cannot exceed final total."
                 )
 
-            booking["deposit_paid"] = (
-                new_total
+            booking[
+                "deposit_paid"
+            ] = new_total
+
+            booking[
+                "pending_amount"
+            ] = (
+                final_total
+                - new_total
             )
 
-            save_bookings(bookings)
+            save_bookings(
+                bookings
+            )
 
             return booking
 
@@ -64,27 +77,51 @@ def set_discount(
     bookings = load_bookings()
 
     for booking in bookings:
-
-        if booking["booking_id"] == booking_id:
-
+        if (
+            booking["booking_id"]
+            == booking_id
+        ):
             if (
                 discount_amount
-                > booking["standard_total"]
+                > booking[
+                    "standard_total"
+                ]
             ):
                 raise ValueError(
                     "Discount cannot exceed total amount."
                 )
 
-            booking["discount"] = (
-                discount_amount
-            )
+            booking[
+                "discount"
+            ] = discount_amount
 
-            booking["final_total"] = (
-                booking["standard_total"]
+            final_total = (
+                booking[
+                    "standard_total"
+                ]
                 - discount_amount
             )
 
-            save_bookings(bookings)
+            booking[
+                "final_total"
+            ] = final_total
+
+            deposit_paid = booking.get(
+                "deposit_paid",
+                0
+            )
+
+            booking[
+                "pending_amount"
+            ] = max(
+                0,
+                final_total
+                - deposit_paid
+            )
+
+            save_bookings(
+                bookings
+            )
 
             return booking
 
@@ -99,32 +136,67 @@ def get_payment_summary(
     bookings = load_bookings()
 
     for booking in bookings:
+        if (
+            booking[
+                "booking_id"
+            ]
+            == booking_id
+        ):
+            if (
+                booking.get(
+                    "booking_status"
+                )
+                == "cancelled"
+            ):
+                balance_due = 0
+                payment_status = (
+                    "cancelled"
+                )
 
-        if booking.get("booking_status") == "cancelled":
-              payment_status = "cancelled"
-              balance_due = 0
-        else:
-            balance_due = (
-            booking["final_total"]
-            - booking["deposit_paid"]
-    )
+            else:
+                balance_due = (
+                    booking.get(
+                        "final_total",
+                        0
+                    )
+                    - booking.get(
+                        "deposit_paid",
+                        0
+                    )
+                )
 
-        if balance_due <= 0:
-           payment_status = "paid"
-        elif booking["deposit_paid"] > 0:
-            payment_status = "partial"
-        else:
-            payment_status = "pending"
+                if balance_due <= 0:
+                    payment_status = (
+                        "paid"
+                    )
 
-            summary = booking.copy()
+                elif (
+                    booking.get(
+                        "deposit_paid",
+                        0
+                    )
+                    > 0
+                ):
+                    payment_status = (
+                        "partial"
+                    )
 
-            summary["balance_due"] = (
-                balance_due
+                else:
+                    payment_status = (
+                        "pending"
+                    )
+
+            summary = (
+                booking.copy()
             )
 
-            summary["payment_status"] = (
-                payment_status
-            )
+            summary[
+                "balance_due"
+            ] = balance_due
+
+            summary[
+                "payment_status"
+            ] = payment_status
 
             return summary
 

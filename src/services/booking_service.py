@@ -38,7 +38,10 @@ def generate_booking_id():
                 number
             )
 
-        except (ValueError, KeyError):
+        except (
+            ValueError,
+            KeyError
+        ):
             continue
 
     return f"BOOKING_{max_number + 1:03d}"
@@ -48,20 +51,27 @@ def create_booking(
     customer_id,
     item_id,
     quantity,
+    booking_date,
+    booking_time,
     delivery_date,
-    return_date
+    return_date,
+    return_time,
+    deposit_paid
 ):
-    # Validate customer first
-    if not customer_exists(customer_id):
+    if not customer_exists(
+        customer_id
+    ):
         raise ValueError(
             "Customer not found."
         )
 
-    availability = check_bulk_availability(
-        item_id,
-        quantity,
-        delivery_date,
-        return_date
+    availability = (
+        check_bulk_availability(
+            item_id,
+            quantity,
+            delivery_date,
+            return_date
+        )
     )
 
     if not availability["available"]:
@@ -70,15 +80,23 @@ def create_booking(
             f"Only {availability['available_quantity']} left."
         )
 
-    inventory_items = get_all_items()
+    inventory_items = (
+        get_all_items()
+    )
 
     rent = None
+    item_name = None
 
     for item in inventory_items:
         if item["item_id"] == item_id:
             rent = item[
                 "standard_rent_per_day"
             ]
+
+            item_name = item[
+                "item_name"
+            ]
+
             break
 
     if rent is None:
@@ -90,24 +108,91 @@ def create_booking(
         rent * quantity
     )
 
+    minimum_deposit = (
+        standard_total * 0.20
+    )
+
+    if deposit_paid < minimum_deposit:
+        raise ValueError(
+            f"Minimum advance amount is "
+            f"₹{minimum_deposit:.0f}"
+        )
+
+    if deposit_paid > standard_total:
+        raise ValueError(
+            "Deposit amount cannot exceed total charge."
+        )
+
+    pending_amount = (
+        standard_total
+        - deposit_paid
+    )
+
     bookings = load_bookings()
 
     booking = {
-        "booking_id": generate_booking_id(),
-        "customer_id": customer_id,
-        "item_id": item_id,
-        "quantity": quantity,
-        "delivery_date": delivery_date,
-        "return_date": return_date,
-        "booking_status": "active",
-        "standard_total": standard_total,
-        "discount": 0,
-        "final_total": standard_total,
-        "deposit_paid": 0
+        "booking_id":
+            generate_booking_id(),
+
+        "customer_id":
+            customer_id,
+
+        "item_id":
+            item_id,
+
+        "item_name":
+            item_name,
+
+        "quantity":
+            quantity,
+
+        "booking_date":
+            booking_date,
+
+        "booking_time":
+            booking_time,
+
+        "booking_datetime":
+            f"{booking_date} {booking_time}",
+
+        "delivery_date":
+            delivery_date,
+
+        "return_date":
+            return_date,
+
+        "return_time":
+            return_time,
+
+        "booking_status":
+            "active",
+
+        "standard_total":
+            standard_total,
+
+        "discount":
+            0,
+
+        "final_total":
+            standard_total,
+
+        "deposit_paid":
+            deposit_paid,
+
+        "pending_amount":
+            pending_amount,
+
+        "refund_amount":
+            0
     }
 
-    bookings.append(booking)
-    save_bookings(bookings)
+    bookings.append(
+        booking
+    )
+
+    save_bookings(
+        bookings
+    )
 
     return booking
 
@@ -130,18 +215,24 @@ def get_customer_bookings(
     ]
 
 
+def search_bookings_by_customer(
+    customer_id
+):
+    return get_customer_bookings(
+        customer_id
+    )
+
+
 def cancel_booking(
     booking_id
 ):
     bookings = load_bookings()
 
     for booking in bookings:
-
         if (
             booking["booking_id"]
             == booking_id
         ):
-
             if (
                 booking.get(
                     "booking_status"
@@ -167,6 +258,10 @@ def cancel_booking(
 
             booking[
                 "deposit_paid"
+            ] = 0
+
+            booking[
+                "pending_amount"
             ] = 0
 
             save_bookings(

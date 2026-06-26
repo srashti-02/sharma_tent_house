@@ -3,11 +3,11 @@
         "item_id": "ITEM_001",
         "item_name": "Plastic Chair",
         "category": "Furniture",
-        "total_quantity": 999,
+        "total_quantity": 200,
         "standard_rent_per_day": 50,
         "damage_charge": 200,
         "item_type": "bulk",
-        "item_status": "active"
+        "item_status": "inactive"
     },
     {
         "item_id": "ITEM_002",
@@ -43,9 +43,19 @@
         "item_id": "ITEM_005",
         "item_name": "Test Chair",
         "category": "Furniture",
-        "total_quantity": 100,
+        "total_quantity": 200,
         "standard_rent_per_day": 50,
         "damage_charge": 200,
+        "item_type": "bulk",
+        "item_status": "active"
+    },
+    {
+        "item_id": "ITEM_006",
+        "item_name": "Plates",
+        "category": "Catering",
+        "total_quantity": 50,
+        "standard_rent_per_day": 15.0,
+        "damage_charge": 20.0,
         "item_type": "bulk",
         "item_status": "active"
     }
